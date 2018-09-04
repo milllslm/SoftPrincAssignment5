@@ -38,7 +38,9 @@
 ;; See the cmd-test in test/asgnx/core_test.clj for the
 ;; complete specification.
 ;;
-(defn cmd [msg])
+(defn cmd [msg]
+  (first (words msg)))
+
 
 ;; Asgn 1.
 ;;
@@ -50,7 +52,8 @@
 ;; See the args-test in test/asgnx/core_test.clj for the
 ;; complete specification.
 ;;
-(defn args [msg])
+(defn args [msg]
+  (into [] (rest (words msg))))
 
 ;; Asgn 1.
 ;;
@@ -64,7 +67,9 @@
 ;; See the parsed-msg-test in test/asgnx/core_test.clj for the
 ;; complete specification.
 ;;
-(defn parsed-msg [msg])
+(defn parsed-msg [msg]
+  {:cmd (cmd msg)
+   :args (args msg)})
 
 ;; Asgn 1.
 ;;
@@ -78,7 +83,7 @@
 ;; See the welcome-test in test/asgnx/core_test.clj for the
 ;; complete specification.
 ;;
-(defn welcome [pmsg])
+(defn welcome [pmsg](str "Welcome " (first(pmsg :args))))
 
 ;; Asgn 1.
 ;;
@@ -88,7 +93,7 @@
 ;; See the homepage-test in test/asgnx/core_test.clj for the
 ;; complete specification.
 ;;
-(defn homepage [_])
+(defn homepage [_] cs4278-brightspace)
 
 
 ;; Asgn 1.
@@ -101,7 +106,13 @@
 ;; See the format-hour-test in test/asgnx/core_test.clj for the
 ;; complete specification.
 ;;
-(defn format-hour [h])
+(defn format-hour [h]
+  (cond
+    (= h 0) "12am"
+    (< h 12) (str h "am")
+    (= h 12) "12pm"
+    :else (str (- h 12) "pm")))
+
 
 ;; Asgn 1.
 ;;
@@ -118,7 +129,9 @@
 ;; See the formatted-hours-test in test/asgnx/core_test.clj for the
 ;; complete specification.
 ;;
-(defn formatted-hours [hours])
+(defn formatted-hours [hours]
+  (str "from " (format-hour (hours :start))
+       " to " (format-hour (hours :end)) " in " (hours :location)))
 
 ;; Asgn 1.
 ;;
@@ -135,7 +148,12 @@
 ;; See the office-hours-for-day-test in test/asgnx/core_test.clj for the
 ;; complete specification.
 ;;
-(defn office-hours [{:keys [args cmd]}])
+(defn office-hours [{:keys [args cmd]}]
+ (let [day (first args)]
+  (if (contains? instructor-hours day)
+    (formatted-hours (get instructor-hours day))
+    "there are no office hours on that day")))
+
 
 ;; Asgn 2.
 ;;
@@ -461,7 +479,12 @@
 ;; See the create-router-test in test/asgnx/core_test.clj for the
 ;; complete specification.
 ;;
-(defn create-router [routes])
+(defn create-router [routes]
+  (fn [pmsg]
+    (let [cmd (pmsg :cmd)]
+      (if (contains? routes cmd)
+        (get routes cmd)
+        (get routes "default")))))
 
 ;; Don't edit!
 (defn output [o]
