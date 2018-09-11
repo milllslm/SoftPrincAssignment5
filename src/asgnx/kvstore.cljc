@@ -32,7 +32,27 @@
 ;;
 ;; See the tests in asgnx.kvstore-test for a complete spec.
 ;;
-(defn state-put [m ks v])
+(defn state-put [m ks v] (assoc-in m ks v))
+
+;; @FoundCode
+;; @Source: https://stackoverflow.com/questions/14488150/
+;;                         how-to-write-a-dissoc-in-command-for-clojure)
+(defn dissoc-in
+  "Dissociates an entry from a nested associative structure returning a new
+  nested structure. keys is a sequence of keys. Any empty maps that result
+  will not be present in the new structure."
+  [m [k & ks :as keys]]
+  (if ks
+    (if-let [nextmap (get m k)]
+      (let [newmap (dissoc-in nextmap ks)]
+        (if (seq newmap)
+          (assoc m k newmap)
+          (dissoc m k)))
+      m)
+    (dissoc m k)))
+
+;; @EndFoundCode
+
 
 ;; Asgn 2
 ;;
@@ -49,7 +69,7 @@
 ;;
 ;; See the tests in asgnx.kvstore-test for a complete spec.
 ;;
-(defn state-remove [m ks])
+(defn state-remove [m ks] (dissoc-in m ks))
 
 ;; Asgn 2
 ;;
@@ -70,7 +90,9 @@
 ;;
 ;; See the tests in asgnx.kvstore-test for a complete spec.
 ;;
-(defn state-get [& args]) ;; Change the signature!
+(defn state-get ([m ks d] (get-in m ks d))
+  ([m ks] (get-in m ks nil)))
+
 
 
 ;; Asgn 2
@@ -88,7 +110,7 @@
 ;;
 ;; See the tests in asgnx.kvstore-test for a complete spec.
 ;;
-(defn state-keys [m ks])
+(defn state-keys [m ks] (keys (get-in m ks)))
 
 
 ;; An in-memory store that mimics the side-effect based stores
