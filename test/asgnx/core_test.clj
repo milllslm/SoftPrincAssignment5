@@ -132,13 +132,12 @@
                                 [:a :f :c]]
                               1))))))
 
-
 (deftest action-insert-test
   (testing "That action insert returns a correctly formatted map"
-    (is (= [:action :ks :v]
-           (keys (action-insert [:a :b] {:foo 1}))))
-    (is (= [:assoc-in [:a :b] {:foo 1}]
-           (vals (action-insert [:a :b] {:foo 1}))))
+    (is (= #{:action :ks :v}
+           (into #{}(keys (action-insert [:a :b] {:foo 1})))))
+    (is (= #{:assoc-in [:a :b] {:foo 1}}
+           (into #{}(vals (action-insert [:a :b] {:foo 1})))))
     (is (= :assoc-in
            (:action (action-insert [:a :b] {:foo 1}))))
     (is (= {:foo 1}
@@ -149,10 +148,10 @@
 
 (deftest action-remove-test
   (testing "That action remove returns a correctly formatted map"
-    (is (= [:action :ks]
-           (keys (action-remove [:a :b]))))
-    (is (= [:dissoc-in [:a :b]]
-           (vals (action-remove [:a :b]))))
+    (is (= #{:action :ks}
+         (into #{} (keys (action-remove [:a :b])))))
+    (is (= #{:dissoc-in [:a :b]}
+          (into #{}(vals (action-remove [:a :b])))))
     (is (= :dissoc-in
            (:action (action-remove [:a :b]))))
     (is (= [:a :b]
@@ -167,3 +166,88 @@
           d (action-insert [:a :f :c] 1)]
       (is (= [a b c d]
              (action-inserts [:a :f] [:b :d :e :c] 1))))))
+
+
+(defn action-send [system {:keys [to msg]}]
+  (put! (:state-mgr system) [:msgs to] msg))
+
+(defn pending-send-msgs [system to]
+  (get! (:state-mgr system) [:msgs to]))
+
+(def send-action-handlers
+  {:send action-send})
+
+(deftest handle-message-test
+  (testing "the integration and handling of messages"
+    (let [ehdlrs (merge
+                   send-action-handlers
+                   kvstore/action-handlers)
+          state  (atom {})
+          smgr   (kvstore/create state)
+          system {:state-mgr smgr
+                  :effect-handlers ehdlrs}]
+      (is (= "There are no experts on that topic."
+             (<!! (handle-message
+                    system
+                    "test-user"
+                    "ask food best burger in nashville"))))
+      (is (= "test-user is now an expert on food."
+             (<!! (handle-message
+                    system
+                    "test-user"
+                    "expert food"))))
+      (is (= "Asking 1 expert(s) for an answer to: \"what burger\""
+             (<!! (handle-message
+                    system
+                    "test-user"
+                    "ask food what burger"))))
+      (is (= "what burger"
+             (<!! (pending-send-msgs system "test-user"))))
+      (is (= "test-user2 is now an expert on food."
+             (<!! (handle-message
+                    system
+                    "test-user2"
+                    "expert food"))))
+      (is (= "Asking 2 expert(s) for an answer to: \"what burger\""
+             (<!! (handle-message
+                    system
+                    "test-user"
+                    "ask food what burger"))))
+      (is (= "what burger"
+             (<!! (pending-send-msgs system "test-user"))))
+      (is (= "what burger"
+             (<!! (pending-send-msgs system "test-user2"))))
+      (is (= "You must ask a valid question."
+             (<!! (handle-message
+                    system
+                    "test-user"
+                    "ask food "))))
+      (is (= "test-user is now an expert on nashville."
+             (<!! (handle-message
+                    system
+                    "test-user"
+                    "expert nashville"))))
+      (is (= "Asking 1 expert(s) for an answer to: \"what bus\""
+             (<!! (handle-message
+                    system
+                    "test-user2"
+                    "ask nashville what bus"))))
+      (is (= "what bus"
+             (<!! (pending-send-msgs system "test-user"))))
+      (is (= "Your answer was sent."
+             (<!! (handle-message
+                   system
+                   "test-user"
+                   "answer the blue bus"))))
+      (is (= "the blue bus"
+             (<!! (pending-send-msgs system "test-user2"))))
+      (is (= "You did not provide an answer."
+             (<!! (handle-message
+                   system
+                   "test-user"
+                   "answer"))))
+      (is (= "You haven't been asked a question."
+             (<!! (handle-message
+                   system
+                   "test-user3"
+                   "answer the blue bus")))))))
