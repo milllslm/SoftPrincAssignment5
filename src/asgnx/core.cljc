@@ -246,7 +246,9 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;;
-(defn experts-register [experts topic id info])
+(defn experts-register [experts topic id info] [action-inserts, (str experts " is now an expert on " topic)])
+
+
 
 ;; Asgn 3.
 ;;
@@ -439,7 +441,11 @@
 (def routes {"default"  (stateless (fn [& args] "Unknown command."))
              "welcome"  (stateless welcome)
              "homepage" (stateless homepage)
-             "office"   (stateless office-hours)})
+             "office"   (stateless office-hours)
+             "expert" (stateless add-expert)
+             "ask" (stateless ask-experts)
+             "answer" (stateless answer-question)})
+
 ;; Asgn 3.
 ;;
 ;; @Todo: Add mappings of the cmds "expert", "ask", and "answer" to
