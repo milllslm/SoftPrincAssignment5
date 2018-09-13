@@ -246,7 +246,7 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;;
-(defn experts-register [experts topic id info] [action-inserts, (str experts " is now an expert on " topic)])
+(defn experts-register [experts topic id info] [(action-insert [experts] {:topic id})])
 
 
 
@@ -432,7 +432,7 @@
 ;;
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
-(defn add-expert [experts {:keys [args user-id]}])
+(defn add-expert [experts {:keys [args user-id]}] [(experts-register experts args user-id nil) (str user-id "is now an expert on " args)])
 
 ;; Don't edit!
 (defn stateless [f]
