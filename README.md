@@ -26,50 +26,70 @@
 
 ## Question 1: 
 a. No
+
 b. Yes, CS 4288
+
 c. No
 
 ## Question 2:
 a. Pretty much every time yeah
+
 b. A couple of times
+
 c. Oh yeah
 
 ## Question 3: 
 a. Never been a TA
+
 b. Most questions kids ask
+
 c. Never been one
 
 ## Question 4: 
 a. Definitely
+
 b. Happens every once in a while
+
 c. Yeah, fairly often
 
 ## Question 5: 
 a. I mean I personally just kind of panic and go straight to the professor because I get overwhelmed and assume they can help.
+
 b. Could have something to do with the honor code but honestly its probably kids getting freaked out because they are confused.
+
 c. I just figure they will always have the answer and I don't really count on my classmates knowing it
 
 ## Question 6: 
 a. Yeah, 1101
+
 b. Duh I'm a CS major
+
 c. Just the Java class
 
 ## Question 7: 
 a. Yeah I looked at it on most assignments
+
 b. Sometimes it is if other people have questions before you even start the assignment
+
 c. Yeah I asked a couple of questions on there
 
 ## Question 8: 
 a. I had to log onto my computer to check it which stunk
+
 b. I get those activity digest emails like once a day and they are so annoying at this point
+
 c. I only really got notified when my specific question was answered, had to go online to see the other questions
 
 ## Question 9: 
 a. Uh no
+
 b. Yeah but I don't really need it at this point I'm a senior
+
 c. Nope wish I had
 
 ## Question 10: 
 a. Groupme or texting
+
 b. Anything I can get on my phone
+
 c. Probably texting or any app on my phone that has notifications like facebook messenger 
