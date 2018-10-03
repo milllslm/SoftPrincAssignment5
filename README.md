@@ -128,7 +128,13 @@ Serverless: Secrets validated
 
 11. To learn more about serverless secrets management, see: https://github.com/trek10inc/serverless-secrets
 
-12. Run "sls deploy" in the root directory and you should see something like this:
+12. Set BucketName in serverless.yml to "cs4278-asgnx-state-<...>"(fill <...> with your own name). You must choose a
+    bucket name that is globally unique to AWS S3. If you do not choose a unique name, you will get the 
+    "bucket already exists" error described below.
+
+13. Set "s3/s3-keystore" on line 78 of lambda.cljs to the bucket name you set in step 12.
+
+14. Run "sls deploy" in the root directory and you should see something like this:
 
 ```
 Serverless: Targeting /.../asgnX/.serverless/asgnx.zip
@@ -164,9 +170,9 @@ functions:
 Serverless: Removing old service versions...
 ```
 
-13. Copy the endpoint URL for POST
-14. Create a "deploy.edn" file in the root folder of the project
-15. Insert a raw Clojure map in the file with keys for your endpoint and
+15. Copy the endpoint URL for POST
+16. Create a "deploy.edn" file in the root folder of the project
+17. Insert a raw Clojure map in the file with keys for your endpoint and
     phone number like this (replace these dummy values with yours!):
 
 ```
@@ -833,6 +839,20 @@ to the instructor.
 You should go to the file / line number specified (e.g., src/asgn1/core.clj line 40) and fix
 the compilation error. No tests will be run and you will get a zero if your code can't be
 compiled.
+
+  5. Deploy Errors - bucket already exists.
+  
+  The name of an S3 bucket must be globally unique. If the bucket name you use in (serverless.yml/ lambda.cljs) already exists in S3, you will get the following error:
+
+```
+Serverless: Operation failed!
+ 
+  Serverless Error ---------------------------------------
+ 
+  An error occurred: StateBucket - cs4278-asgnx-state already exists.
+```
+  You can correct this error by choosing a bucket name that isn't already in use.
+
 
 
 ### Bugs
