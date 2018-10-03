@@ -246,7 +246,8 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;;
-(defn experts-register [experts topic id info] [(action-insert [experts] {:topic id})])
+(defn experts-register [experts topic id info]
+  [(action-insert [:expert topic id ] info)])
 
 
 
@@ -266,7 +267,7 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;;
-(defn experts-unregister [experts topic id])
+(defn experts-unregister [experts topic id] [(action-remove [:expert topic id])])
 
 (defn experts-question-msg [experts question-words]
   (str "Asking " (count experts) " expert(s) for an answer to: \""
@@ -331,7 +332,19 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;;
-(defn ask-experts [experts {:keys [args user-id]}])
+(defn ask-experts [experts {:keys [args user-id]}]
+  (if (empty? (rest args))
+    [[] "You must ask a valid question."]
+    (if (empty? experts)
+      [[] "There are no experts on that topic."]
+      [(into [] (concat (action-inserts [:conversations] experts user-id)
+                 (action-send-msgs experts (clojure.string/join " " (rest args)))))
+       (experts-question-msg experts (rest args))])))
+
+
+
+
+
 
 ;; Asgn 3.
 ;;
@@ -385,7 +398,13 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;;
-(defn answer-question [conversation {:keys [args]}])
+(defn answer-question
+  [conversation {:keys [args]}]
+ (cond
+   (empty? conversation) [[] "You haven't been asked a question."]
+   (empty? (rest args)) [[] "You did not provide an answer."]
+   :else [[(action-send-msg conversation (clojure.string/join " " args))]  "Your answer was sent."]))
+
 
 ;; Asgn 3.
 ;;
@@ -427,7 +446,9 @@
 ;;
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
-(defn add-expert [experts {:keys [args user-id]}] [(experts-register experts args user-id nil) (str user-id "is now an expert on " args)])
+(defn add-expert [experts {:keys [args user-id]}]
+  [(experts-register experts (first args) user-id {:job "cook"})
+   (str user-id " is now an expert on " (first args) ".")])
 
 ;; Don't edit!
 (defn stateless [f]
@@ -439,9 +460,9 @@
              "welcome"  (stateless welcome)
              "homepage" (stateless homepage)
              "office"   (stateless office-hours)
-             "expert" (stateless add-expert)
-             "ask" (stateless ask-experts)
-             "answer" (stateless answer-question)})
+             "expert" add-expert
+             "ask" ask-experts
+             "answer"  answer-question})
 
 ;; Asgn 3.
 ;;
