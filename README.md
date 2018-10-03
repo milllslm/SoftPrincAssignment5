@@ -93,3 +93,27 @@ a. Groupme or texting
 b. Anything I can get on my phone
 
 c. Probably texting or any app on my phone that has notifications like facebook messenger 
+
+# Requirements
+Each requirement will be listed as (a), will be accompanied by a (b) that rationalizes the need for the requirement, and will be followed by a quick synopsis (c) of the proposed way in which the application will fullfill that requirement.
+
+1.
+  a. A text based application
+  b. Not only is this a requirement from the Professor, but it also directly emphathizes with users as seen in their responses to question 10 where they note that text messaging/phone communication is the most convenient and reliable mode of communication for them.
+  c. This will be accomplished using the twilio accounts from assignment 4 in conjunction with the base code that we already have from assignments 1-3, which correctly parses and handles incoming text messages of the correct format with the correct side effects.
+2.
+  a. Ensure that questions are first sent to classmates before resorting to alternatives for answers
+  b. As noted by the interviewee that was a TA (and by prior discussions with teachers and Professors from my past), a major annoyance is that students tend to ask questions to people far above the required heirarchical level needed for a sufficient response.
+  c. As noted in the overview, this will be accomplished by some sort of escalation protocol. For the full scale proposed application, this would take the form of classmates->TAs->Professors-> wikipedia escalation via a timer; however, for the 'stub' needed for demo purposes this may just take the form of one level of escalation (either from classmates->TA or classmates->wikipedia) via the same timer mechanism.
+3. 
+  a. Ensure that set up for users is not lengthy or cumbersome.
+  b. The point of this application is to make an easier, more accessible version of a Piazza-esque system. Thus, not only should the messages be easily accessible for users (by texting it directly to them), but the set up should be as easy or easier than downloading an app on one's phone.
+  c. This will be done by adapting the 'add expert' functionality of the preexisting base code. In doing so set up for any individual (classmate, TA, or Professor) will be as easy as texting 'add <classmate, TA, or Professor>' to the appropriate phone number for the twilio bot.
+4.
+  a. For the full scale application, some sort of tangible response must be generated within a manageable timespan (~30 minutes)
+  b. As seen in the 'panic' noted in responses to Question 5, students are high stress individual. As a student myself, I know how disheartening and frightening it can be to have a question go unanswered for a long time (when you email a professor and they don't respond for a day). Thus, the application should give some sort of comforting (as comforting as a wikipedia page may be) response in 30 minutes or less.
+  c. This will be accomplished via the timeouts and escalation progression that was previously stated for the full scale application. By the time 30 minutes has passed, if no answer has been submitted, the question will have been asked to classmates, TAs, and Professors, and at the very least the bot will return the wikipedia page for the submitted topic.
+
+
+# Development Approach
+In an attempt to be as thorough as possible, I will include in this development approach the development of the parts of the application that are already done (the base functions and the handlemsg functionality as well as the memstore, plus having a twilio account for testing purposes).
