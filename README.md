@@ -62,7 +62,7 @@ c. I just figure they will always have the answer and I don't really count on my
 ## Question 6: 
 a. Yeah, 1101
 
-b. Duh I'm a CS major
+b. Duh I'm a CompE major
 
 c. Just the Java class
 
