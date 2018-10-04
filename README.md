@@ -165,11 +165,11 @@ In an attempt to be as thorough as possible, I will include in this development 
 At this stage you need to identify the architecture of the system you want to design. While brainstorming the architecture you should consider the inputs, outputs, and thus the the flow that your code should take to get from one to the other.
 
 ### Code Flow
-The inputs to this problem will be a text message from a given user. Given that we already have the structure from assignments 1-3, it seems most practical to maintain the input structure from the existing codebase. Thus the input is a message from a given user (unique ID by phone number) in the format of a parsed message. This parsed message will have a <cmd> as the first word in the message. What follows will be the args. Depending on the command there may be 0 args, 1 arg, or multiple - in which case the second space-deliniated word would become the < topic >.
+The inputs to this problem will be a text message from a given user. Given that we already have the structure from assignments 1-3, it seems most practical to maintain the input structure from the existing codebase. Thus the input is a message from a given user (unique ID by phone number) in the format of a parsed message. This parsed message will have a < cmd > as the first word in the message. What follows will be the args. Depending on the command there may be 0 args, 1 arg, or multiple - in which case the second space-deliniated word would become the < topic >.
   
 The outputs to this problem will also be text messages. Depending on the command that was input, the output message may be simply confirming that their command was succssfully received, but may also be a response to a user's question from another user. In order to actually send the output of our clojure code to the users it needs to go to (whether that is sending a question to everyone it needs to or sending the answer from one user to the asker) we will need some sort of function to interact with the twilio api. Thus we will need a action-send-msgs function to communicate with the conveniently supplied code to interact with twilio.
 
-Given this input and output, we can now address the black box in the middle. Since our input relies primarily on the first word of the message, there will need to be some sort of router function to redirect the rest of the of the message to the appropriate function handler based on what the <cmd> is. Say hello to create-router in handle-message. So now given an input message we can correctly forward everything after the first word to the appropriate handler.
+Given this input and output, we can now address the black box in the middle. Since our input relies primarily on the first word of the message, there will need to be some sort of router function to redirect the rest of the of the message to the appropriate function handler based on what the < cmd > is. Say hello to create-router in handle-message. So now given an input message we can correctly forward everything after the first word to the appropriate handler.
   
 Now what sort of commands do we want the user to be able to invoke?
 
@@ -179,11 +179,11 @@ Now what sort of commands do we want the user to be able to invoke?
   
 3. Naturally, if a user asks a question another user will need to be able to answer that question. Thus there will be a universal **answer-question** function that allows a user to answer the most recent question that they have been asked. One clear limitation in this implementation is that only the most recent question will be answered, any older unanswered questions will be overwritten. Given more time for implementation this would be the first thing I would choose to address; however, given the time span that we have I do not believe I will be able to fix this in time.
   
-Also, although it was not explicitly stated above, it should be understood that each of the functions will do their respective error checking. Add will check that the <target-group> is a valid one, ask will verify the <target-group> and assure that there is both a topic and a remaining question after it, and answer will verify that a non-empty answer is returned as well as verifying that a question has been asked.
+Also, although it was not explicitly stated above, it should be understood that each of the functions will do their respective error checking. Add will check that the < target-group > is a valid one, ask will verify the < target-group > and assure that there is both a topic and a remaining question after it, and answer will verify that a non-empty answer is returned as well as verifying that a question has been asked.
   
 Lastly, we will want to acknowledge that the system has received a given message and is acting on it. Thus our router/handler complex will need to not only execute the right set of functions as side-effects, but will not to also return some sort of message immediately to the sender of a command. Thus the return of any of the above functions needs to be two-fold, with both a response string as well as the actions that need to be subsequently taken by the system.
 
-In conclusion: Input text message -> router -> appropriate function based on <cmd> -> function executes with params -> response string & actions resulting from the command (actions may trigger subsequent functions).
+In conclusion: Input text message -> router -> appropriate function based on < cmd > -> function executes with params -> response string & actions resulting from the command (actions may trigger subsequent functions).
   
 #### The Timer
 For the full scale application I would choose to have AWS Events trigger every minute or so to call a check-timeouts function that goes through and looks at every question's time stamp to see if its 10 minutes are up for escalation; however, using AWS Events costs money and is likely to exceed the week we have to develop this. Thus, for the demo I will just have the check-timeouts function be called directly by a user to trigger the checking of question timeouts and thus the triggering of an escalation.
@@ -191,18 +191,18 @@ For the full scale application I would choose to have AWS Events trigger every m
 ### Publicly Available Functions
 In summary of above, users should be able to invoke action from the system with the following functions/messages:
 
-1. add-<group> (add-classmate, add-TA, add-Professor): Should simply add the user to the given group (structurally articulated below).
+1. add-< group > (add-classmate, add-TA, add-Professor): Should simply add the user to the given group (structurally articulated below).
 
-2. ask-classmates: users should be able to submit a question via a message formatted "ask-classmates <topic> <args>".
+2. ask-classmates: users should be able to submit a question via a message formatted "ask-classmates < topic > < args >".
   
-3. answer-question: users can respond to the most recent question they have been texted by texting "answer <the-answer>".
+3. answer-question: users can respond to the most recent question they have been texted by texting "answer < the-answer >".
   
 4. ***for demo only*** check-timeouts: manually trigger the system to check if any of the questions in the :questions map have reached their time limit and trigger the appropriate response.
 
 ### Structural and Data Type Considerations
 Given the above codeflow we need to make some decisions about how we will represent various components as to be the most efficient, reusable, and extensible.
 
-1. Input message: since the input message is predictably broken apart, we can do this as a first step. This parsed-msg will have some predictable components - the <cmd> and the <args>. However, we may want to add other useful information to an incoming message such as the uniqueId of the user or we may want to extract the <topic> from the <args> for certain functions. So we need a flexible data type that can take advantage of keywords. Thus the best approach would be to store the parsed-msgs as a map of key value pairs using keywords.
+1. Input message: since the input message is predictably broken apart, we can do this as a first step. This parsed-msg will have some predictable components - the < cmd > and the < args >. However, we may want to add other useful information to an incoming message such as the uniqueId of the user or we may want to extract the < topic > from the < args > for certain functions. So we need a flexible data type that can take advantage of keywords. Thus the best approach would be to store the parsed-msgs as a map of key value pairs using keywords.
   
 2. Storing the state of the system: this is a big one. The system as a whole has many interrelated moving parts and will thus need some sort of global state that is shared/available to various parts of the application at any given time. Given the immutability of clojure this is a larger task than it may originally seem. We need to keep track of the members of each of the 3 groups as well as the questions that have been asked of every single individual (so that they may ask them). Furthermore, we need a way to check if a given question has been answered within the time frame of its timer (10 minutes).
 
@@ -328,7 +328,7 @@ Below are a set of simple steps for running the demo (or for live testing with a
 2. Have your participants text "add-classmate" to the Twilio number (+16159083013)
 3.
 
-  a. Have one participant (the demoer) text in a question "ask <topic> <remainder of question>"
+  a. Have one participant (the demoer) text in a question "ask < topic > < remainder of question >"
   
   b. The rest of the class should recieve the question if they have registered
   
