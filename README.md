@@ -163,14 +163,21 @@ Now what sort of commands do we want the user to be able to invoke?
 2. As per the nature of the application, classmates need to be able to pose a question to the class. Thus we will need a function handler that takes the rest of the words in the message, and asks a question for a given topic. Since there are three groups of people that we may need to ask one of four groups of people/wikipedia we will need a **ask-classmates**, a **ask-TAs**, a **ask-professors**, and a **ask-wiki** function. Notice that with this application as opposed to assignment 1-3, the topic is not necessary at this point for selecting experts on a given topic. Regardless of the topic the escalation of the question and the recipients of the question will be the same - topic is only important for the ask-wiki function. For the other three functions, the topic will merely serve as subject-line-esque component.
   
 3. Naturally, if a user asks a question another user will need to be able to answer that question. Thus there will be a universal **answer-question** function that allows a user to answer the most recent question that they have been asked. One clear limitation in this implementation is that only the most recent question will be answered, any older unanswered questions will be overwritten. Given more time for implementation this would be the first thing I would choose to address; however, given the time span that we have I do not believe I will be able to fix this in time.
-
-Notice that both add and ask have 3-4 named variations of basically the same function. In order to consolidate this, a good idea would be a generic wrapper **ask** and **add** function that each take a first parameter <target-group> as their first parameter and will conduct the branching there to the appropriate specific function.
   
 Also, although it was not explicitly stated above, it should be understood that each of the functions will do their respective error checking. Add will check that the <target-group> is a valid one, ask will verify the <target-group> and assure that there is both a topic and a remaining question after it, and answer will verify that a non-empty answer is returned as well as verifying that a question has been asked.
   
 Lastly, we will want to acknowledge that the system has received a given message and is acting on it. Thus our router/handler complex will need to not only execute the right set of functions as side-effects, but will not to also return some sort of message immediately to the sender of a command. Thus the return of any of the above functions needs to be two-fold, with both a response string as well as the actions that need to be subsequently taken by the system.
 
 In conclusion: Input text message -> router -> appropriate function based on <cmd> -> function executes with params -> response string & actions resulting from the command (actions may trigger subsequent functions).
+
+### Publicly Available Functions
+In summary of above, users should be able to invoke action from the system with the following functions/messages:
+
+1. add-<group> (add-classmate, add-TA, add-Professor): Should simply add the user to the given group (structurally articulated below).
+
+2. ask-classmates: users should be able to submit a question via a message formatted "ask-classmates <topic> <args>".
+  
+3. answer-question: users can respond to the most recent question they have been texted by texting "answer <the-answer>".
 
 ### Structural and Data Type Considerations
 Given the above codeflow we need to make some decisions about how we will represent various components as to be the most efficient, reusable, and extensible.
@@ -286,7 +293,7 @@ To test the twilio integration you will need to switch the environment in handle
 When you think you have a final working version of this application (or at least the prototype), it is strongly advised that you test this with a sample group of people to mimic a classroom setting. A couple of runs of this should identify errors in implementation or, at the very least, what might be the best next steps for future iterations of this project.
 
 ## Deployment
-???????????? need to figure out how exactly this works with deploying the clojure code to work with twilio.
+???????????? need to figure out how exactly this works with deploying the clojure code to work with twilio. also is there a way to make methods private vs public in clojure.
 
 ## Demo Stub
 As noted throughout this document the scope of this idea is very large relative to the time we have to engineer it. Thus I will take this time to outline the capability that is being aimed for for the stubbed version needed for the demo date:
