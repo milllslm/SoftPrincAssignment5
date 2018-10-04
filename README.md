@@ -142,7 +142,7 @@ In an attempt to be as thorough as possible, I will include in this development 
 
 4. Identify a solution to this problem that seems consistent with your engineering capabilites and the timeframe in which you have to work.
 
-***From here on out the understanding is that the above steps were followed and that the decision to pursue the concept identified in the overview section*** 
+***From here on out the understanding is that the above steps were followed and that the decision was to pursue the concept identified in the overview section*** 
 
 ## Architecture Design/Brainstorming
 At this stage you need to identify the architecture of the system you want to design. While brainstorming the architecture you should consider the inputs, outputs, and thus the the flow that your code should take to get from one to the other.
