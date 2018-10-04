@@ -94,6 +94,19 @@ b. Anything I can get on my phone
 
 c. Probably texting or any app on my phone that has notifications like facebook messenger 
 
+# User Stories
+From the questions and answers we can put together some user stories that will help focus and drive our development mindset.
+
+1. As a student in a class I want to be able to ask a class-related question and get some sort of feedback in 3o minutes or less.
+
+2. As a TA I want to force students to consult with their classmates before they come ask me a (usually) trivial question.
+
+3. As a Professor, I only really want to be bothered if neither a stuedent's peers, nor the TAs can help them.
+
+4. As a student, I want the relative experience of Piazza, but on my phone (preferably via text).
+
+5. As a student, if nobody can answer my question I at least would like a link to a helpful website.
+
 # Requirements
 Each requirement will be listed as (a), will be accompanied by a (b) that rationalizes the need for the requirement, and will be followed by a quick synopsis (c) of the proposed way in which the application will fullfill that requirement.
 
@@ -140,7 +153,9 @@ In an attempt to be as thorough as possible, I will include in this development 
 
 2. Identify questions that will help clarify the problem in question as well as proposed solution-elements from population members.
 
-3. Collect answers to these questions from a sample of the population, understand their view of the problem and the key components that need to be addressed. These components become your requirements as seen in the above section.
+3.1. Collect answers to these questions from a sample of the population, understand their view of the problem and the key components that need to be addressed. These components become your requirements as seen in the above section.
+
+3.2. Distill these requirements and the feedback from the interviews into a handful of user stories for easy explanation and analysis of the solution.
 
 4. Identify a solution to this problem that seems consistent with your engineering capabilites and the timeframe in which you have to work.
 
@@ -169,6 +184,9 @@ Also, although it was not explicitly stated above, it should be understood that 
 Lastly, we will want to acknowledge that the system has received a given message and is acting on it. Thus our router/handler complex will need to not only execute the right set of functions as side-effects, but will not to also return some sort of message immediately to the sender of a command. Thus the return of any of the above functions needs to be two-fold, with both a response string as well as the actions that need to be subsequently taken by the system.
 
 In conclusion: Input text message -> router -> appropriate function based on <cmd> -> function executes with params -> response string & actions resulting from the command (actions may trigger subsequent functions).
+  
+#### The Timer
+For the full scale application I would choose to have AWS Events trigger every minute or so to call a check-timeouts function that goes through and looks at every question's time stamp to see if its 10 minutes are up for escalation; however, using AWS Events costs money and is likely to exceed the week we have to develop this. Thus, for the demo I will just have the check-timeouts function be called directly by a user to trigger the checking of question timeouts and thus the triggering of an escalation.
 
 ### Publicly Available Functions
 In summary of above, users should be able to invoke action from the system with the following functions/messages:
@@ -178,6 +196,8 @@ In summary of above, users should be able to invoke action from the system with 
 2. ask-classmates: users should be able to submit a question via a message formatted "ask-classmates <topic> <args>".
   
 3. answer-question: users can respond to the most recent question they have been texted by texting "answer <the-answer>".
+  
+4. ***for demo only*** check-timeouts: manually trigger the system to check if any of the questions in the :questions map have reached their time limit and trigger the appropriate response.
 
 ### Structural and Data Type Considerations
 Given the above codeflow we need to make some decisions about how we will represent various components as to be the most efficient, reusable, and extensible.
@@ -192,7 +212,7 @@ For each of the groups we do not need to store anything except for the identifie
 
 For the conversation, we need to keep track of the most recent question any given user has been asked. However, we also need to know who asked the question. Thus the top level :conversation key will map to another map, where the key is any individual's uniqueId (phone number) and the value will be the question itself and the uniqueId of who asked it - so that the response can be sent to the correct individual.
 
-For the questions, we need to keep track of whether a given user's most recent question has been answered so that when the timer goes off we can either do nothing or escalate the question (or return the wikipedia link for the prototype). To do this the :questions key should map to another map where the key is a given userId and the value another map consisting of :topic and :status. :topic will hold the topic in the event that wikipedia is necessary, whereas :status is either "open" or "closed" in respect to the question that the individual asked. When a question is asked this state will be stored as opened, and when a user answers a question this will also go update the field for the askee's question to "closed". When the timer goes off from a given question, this will trigger a check of a given userIds key under :questions. If the value is "closed" then nothing happens. If the value is "open" then the question should be escalated (or in the case of the demo, the wikipedia page for the topic should be returned to the user).
+For the questions, we need to keep track of whether a given user's most recent question has been answered so that when the timer goes off we can either do nothing or escalate the question (or return the wikipedia link for the prototype). To do this the :questions key should map to another map where the key is a given userId and the value is both the :topic and the :time that the question is asked (in UTC) plus whatever limit (10 minutes for full app) we choose to apply. This way the check-timeouts function can merely iterate through the sequence generated by the :questions map and check if any of the :time 's have been passed yet. If yes, the system merely returns the wikipedia for the corresponding :topic to the given userId.
 
 ### Estimations
 Now that we've identified the moving pieces and what our data structures might look like, lets take a look back at how long this might take. I will break this up into milestones to aid in the estimation
@@ -201,7 +221,9 @@ Now that we've identified the moving pieces and what our data structures might l
 
 2. Modifying the above system to have a state-manager that supports the :questions field and up to 3 different groups of individuals, each of which have the ability to add themselves to a group and answer questions - and at least the first group has the ability to answer them: Given that I should have a good understanding of the storage system and the core functionality of the code generated in step 1, this part should not take too long to generate. I would estimate that **10-12 hours** of effort may be required as unforseen conflicts are likely to occur.
 
-3. Adding a timer componenent that triggers a callback of some sort, starting by just triggering the ask-wiki function if the timer occurs before a given question has been answered. This one is a tad tricky as it depends on the performance of timers in clojure. A quick google search shows that setting a timer is possible; however, it is not immediately clear how this asynchronous timer approach will work within the preexisting code. Such uncertainty should be treated with cautious estimation and thus I will estimate a wide range of **10-15 hours** for this component.
+3.1. Adding an AWS Event to reoccur every mintue or so to call check-timeouts: With no prior experience with AWS Events it is very uncertain as to how long setting this up might take me. Such uncertainty should be treated with cautious estimation and thus I will estimate a wide range of **10-15 hours** for this component.
+
+3.2. For the demo, setting up a manual trigger of check-timeouts (as well as coding check-timeouts): **5-10 hours** depending on the behavior of the mapping and the lookup as well as the use of UTC libraries.
 
 4. Extending the above step to include escalation from classmates-> TAs -> Professors -> wikipedia: while it seems like this may just be a case of successive iteration on step 3, there are likely to arise conflicts with the timers and the multiple stages of escalation. Thus I would estimate another **10-12 hours** of effort for this componenet.
 
@@ -224,15 +246,15 @@ As the codeflow and data structures sections lay out the step by step desired ar
 
 6. Write the ask-wiki method to merely return a url based on the :topic of the parsed-msg.
 
-7. Add in the timer to print out some random message (make sure the way you are using the timer is valid).
+7. Add in the check-timeouts method to comb through the :questions map and check for expired questions.
 
-8. Cause the timer to trigger a function that takes in the userId of the asker and thus checks the asker's uniqueId within the :questions cache to see if :status is open or closed.
-
-9. If :status above was open, now trigger ask-wiki and close the question status.
+8. On finding an expired question, send a text to whomever asked the question with the wikipedia url for their given topic.
 
 The rest is beyond the scope of the demo stub
 
-10. Now alter the timer to escalate the issue to the next level if the question status was open, rather than immediately triggering ask-wiki.
+9. Now rather than manually triggering the check-timeouts method via a text message, set up AWS Events to check every minute for you.
+
+10. Now rather than escalating straight to wikipedia, have the escalation go in the desired order of groups: classmates->TAs->Profs->wikipedia.
 
 ## Integration With External Service
 
@@ -272,11 +294,6 @@ sls secrets validate
 {:endpoint "https://abcxyz.execute-api.us-east-1.amazonaws.com/dev/msg"
  :phone-number "+1615xxxxxxx"}
 
-
-
-### Clojure on Twilio
-This is a big ? for me I don't fully understand this part yet
-
 ## Testing
 Automated testing is not likely to be achieved within the time span of this assignment, so we will have to rely on live testing and hands on tests.
 
@@ -293,7 +310,7 @@ To test the twilio integration you will need to switch the environment in handle
 When you think you have a final working version of this application (or at least the prototype), it is strongly advised that you test this with a sample group of people to mimic a classroom setting. A couple of runs of this should identify errors in implementation or, at the very least, what might be the best next steps for future iterations of this project.
 
 ## Deployment
-???????????? need to figure out how exactly this works with deploying the clojure code to work with twilio. also is there a way to make methods private vs public in clojure.
+???????????? waiting on updated spec from Professor for windows Home
 
 ## Demo Stub
 As noted throughout this document the scope of this idea is very large relative to the time we have to engineer it. Thus I will take this time to outline the capability that is being aimed for for the stubbed version needed for the demo date:
@@ -304,5 +321,18 @@ As noted throughout this document the scope of this idea is very large relative 
 - Any member of the class that is texted a question may reply
 - If no reply is given in 10 minutes then a link to the wikipedia page for a given topic will be returned instead
 - No user should ask a new question before their previous question has been answered for the timer to work
+
+### Demo Use Tutorial
+Below are a set of simple steps for running the demo (or for live testing with a fake classroom)
+1. Deploy the code to AWS for integration with Twilio (see the above section on deployment)
+2. Have your participants text "add-classmate" to the Twilio number (+16159083013)
+3. 
+  a. Have one participant (the demoer) text in a question "ask <topic> <remainder of question>"
+  b. The rest of the class should recieve the question if they have registered
+4. 
+  a. After one minute has passed, have one participant text in the demo trigger for checking the timeout "check-timeouts"
+  b. The person who asked the question should recieve the link to the wikipedia page for their topic.
+5. If someone had already answered the question then no wiki link should have been returned.
+
 
 
