@@ -131,6 +131,8 @@ Each requirement will be listed as (a), will be accompanied by a (b) that ration
 
 
 # Development Approach
+The below development approach used below is the best reflection of the steps I feel would be most effective in completing this project. The order chosen is designed so that one spends time considering the design and its components before beginning the engineering work. Ideally, the below approach will force the engineer to consider how the parts will interact before they begin engineering so that they do not realize flaws in their logic during the actual engineering process.
+
 In an attempt to be as thorough as possible, I will include in this development approach the development of the parts of the application that are already done (the base functions and the handlemsg functionality as well as the memstore, plus having a twilio account for testing purposes). The approach highlights the broad steps as well as their specific subparts.
 
 ## Requirements Gathering
