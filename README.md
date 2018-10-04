@@ -326,12 +326,18 @@ As noted throughout this document the scope of this idea is very large relative 
 Below are a set of simple steps for running the demo (or for live testing with a fake classroom)
 1. Deploy the code to AWS for integration with Twilio (see the above section on deployment)
 2. Have your participants text "add-classmate" to the Twilio number (+16159083013)
-3. 
+3.
+
   a. Have one participant (the demoer) text in a question "ask <topic> <remainder of question>"
+  
   b. The rest of the class should recieve the question if they have registered
-4. 
+  
+4.
+
   a. After one minute has passed, have one participant text in the demo trigger for checking the timeout "check-timeouts"
+
   b. The person who asked the question should recieve the link to the wikipedia page for their topic.
+
 5. If someone had already answered the question then no wiki link should have been returned.
 
 
