@@ -464,7 +464,7 @@
 (defn questions-timestamp-query [state-mgr pmsg]
   (get! state-mgr [:questions]))
 
-(defn all-state [full-state pmsg] [[] (str "questions: " )])
+(defn all-state [full-state pmsg] [[] (str "questions: " (questions-timestamp-query full-state pmsg))])
 
 ;; Don't edit!
 (defn stateless [f]
