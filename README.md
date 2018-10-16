@@ -1,957 +1,342 @@
-# Instructions
 
-## Getting the Code
+# SoftPrincAssignment5  
+# Codename: Escalation Protocol
 
-Asgn 1 is contained in the master branch of this repo. Complete this assignment and
-make sure that all of your code is committed.
+# Overview:
+  My overall idea for this project is a texting based, escalation twist on the Piazza application. When this project was announced I quickly drew separate comparisons between the experts of our base app and the concept of Teaching Assistants and Professors. Throughout my academic career I have routinely heard professors complaining that kids ask them questions without previously consulting their peers and thus wasting the professor's time. In conjunction with this, I asked my friends and classmates (some of which were TAs) and got their feedback on the pros and cons of Piazza in their experiences. As a result I was able to craft the below questions to reaffirm the direction that I was already leaning as well as to refine my understanding of the needs and wants of my target audience.
 
-Asgn 2 is contained in the "asgn2" branch of this repo. When you are ready to start
-Asgn 2, create a new "asgn2-solution" branch ("git checkout -b asgn2-solution") and
-merge the "asgn2" branch into it ("git merge asgn2").
+  The below questions gave me some refined insight as well as some insight that I was previously ignorant of. The main thing that caught me offguard was the response of individual b regarding question 5. The response in question highlights that concerns about the honor code may be causing students to go straight to teachers rather than asking their classmates. This definitely is something I would need to take into consideration in the production stage of this application, either by sensoring the responses of classmates somehow or by allowing the teacher to see all questions and answers regardless of whether they were asked to them yet or not. Other than that, the responses mostly aligned with what I already supposed: students often ask questions that may have been easily answered by a classmate, relying on a computer for Piazza was a hassle, and that texting/push notifications were the best way to ensure a student recieves a message from someone.
 
-Asgn 3 is contained in the "asgn3" branch of this repo. When you are ready to start
-Asgn 3, create a new "asgn3-solution" branch from your asgn2-solution branch ("git
-checkout -b asgn3-solution") and merge the "asgn3" branch into it ("git merge asgn3").
-
-Asgn 4 is contained in the "asgn4" branch of this repo. When you are ready to start
-Asgn 4, create a new "asgn4-solution" branch from your asgn3-solution branch ("git
-checkout -b asgn4-solution") and merge the "asgn4" branch into it ("git merge asgn4").
-
-## Installation for Asgns 1-3
-
-  1. Clone the repo
-  2. Install Java 8 or higher
-  3. Install Leiningen and ensure it is on your path (https://leiningen.org/)
-  4. Install the Amazon AWS CLI Tools (https://aws.amazon.com/cli/) and make sure
-     that your AWS account credentials are stored in a credentials file as
-     described here: https://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html
-  5. Sign up for a Cognito account for the Autograder using:
-
-     https://cs4278-2018.auth.us-east-1.amazoncognito.com/login?response_type=code&client_id=2akam9tnpjfkkdn1e38qbopkb4&redirect_uri=https://www.magnum.io
-
-     Note: after signing up, you may be redirected to a blank page, which is OK. Just
-           make sure that you create an account.
-
-  6. Run "lein deps" in the root of the project
-  7. Run "lein repl" and make sure that you see something like:
-
-  ```
-  nREPL server started on port 55094 on host 127.0.0.1 - nrepl://127.0.0.1:55094
-  REPL-y 0.3.7, nREPL 0.2.13
-  Clojure 1.9.0
-  Java HotSpot(TM) 64-Bit Server VM 1.8.0_131-b11
-      Docs: (doc function-name-here)
-            (find-doc "part-of-name-here")
-    Source: (source function-name-here)
-   Javadoc: (javadoc java-object-or-class-here)
-      Exit: Control+D or (exit) or (quit)
-   Results: Stored in vars *1, *2, *3, an exception in *e
-
-  asgnx.cli=>
-  ```
-
-  8. Connect to your REPL from Atom by opening Atom and running the
-     command `Proto Repl: Remote Nrepl Connection` and filling in
-     `localhost` and the port that was printed out when the repl started.
-
-  9. Once the REPL finishes refreshing, try evaluating:
-
-  ```
-  (+ 1 1)
-  ```
-
-  10. In another terminal window, run the "lein test-refresh" command at
-      the root of the project and make sure that the autograder runs.
-
-  11. Unless this is Asgn 4, skip down to the assignment spec and read
-      the rest of this README very carefully.
+  As a result, I have decided to build a Piazza-inspired messaging app for question-answer class questions that uses an escalation method. In borrowing from the storage structure of our base application, there will be classmates: TAs: and Professor(s): rather than the experts: map. When a classmate poses a question, it is sent to everyone on the classmates list (the asker included). Anyone in the class may submit an answer to the question, the answer will only be sent to the person who asked it. Submitting a question will also trigger a timer (as of right now I'm thinking 10 minutes), afterwhich the question will be escalated if no answer has been submitted. At this point the question will be sent out to the TAs of the class. This timer will once again run for 10 minutes, and if no answer is provided the Professor(s) will recieve a text with the question. If this still does not resolve the question in 10 minutes then the application will merely return the wikipedia page for the topic of the question.
+  ***Disclaimer: After speaking to Professor White, he advised that an abridged version be done for this project initially as we do not have much time to code it, so maybe just one level of escalation or just the wikipedia return after the timeout***
 
 
-## Installation for Asgn 4
+# Questions:
+  1. Have you ever been a TA for a class?
+  2. Have you ever asked a TA a question and in retrospect thought it was a 'stupid question'?
+  3. If you have been a TA, have you ever been asked a question that could have easily been answered by one of their classmates?
+  4. Have you ever asked a Professor a question and in retrospect thought it was a stupid question?
+  5. Why do you (or why do you think that others) choose to ask the Professor before consulting their fellow classmates?
+  6. Have you ever had a class that used Piazza?
+  7. Did you find Piazza overall beneficial for that class?
+  8. What was the biggest drawback of Piazza?
+  9. Did you know there was a Piazza phone app?
+  10. What's the most efficent/convenient form of communication for you as a college student?
 
-You must create a Twilio account to send / receive SMS. To do this, follow
-these steps:
+  # Answers: (a,b, and c denote the three individuals interviewed consistently)
 
-0. Merge the asgn4 branch into your current branch
-1. Install the Serverless framework and all dependencies (NodeJs, etc.): https://serverless.com/framework/docs/providers/aws/guide/installation/
+## Question 1:
+a. No
+
+b. Yes, CS 4288
+
+c. No
+
+## Question 2:
+a. Pretty much every time yeah
+
+b. A couple of times
+
+c. Oh yeah
+
+## Question 3:
+a. Never been a TA
+
+b. Most questions kids ask
+
+c. Never been one
+
+## Question 4:
+a. Definitely
+
+b. Happens every once in a while
+
+c. Yeah, fairly often
+
+## Question 5:
+a. I mean I personally just kind of panic and go straight to the professor because I get overwhelmed and assume they can help.
+
+b. Could have something to do with the honor code but honestly its probably kids getting freaked out because they are confused.
+
+c. I just figure they will always have the answer and I don't really count on my classmates knowing it
+
+## Question 6:
+a. Yeah, 1101
+
+b. Duh I'm a CompE major
+
+c. Just the Java class
+
+## Question 7:
+a. Yeah I looked at it on most assignments
+
+b. Sometimes it is if other people have questions before you even start the assignment
+
+c. Yeah I asked a couple of questions on there
+
+## Question 8:
+a. I had to log onto my computer to check it which stunk
+
+b. I get those activity digest emails like once a day and they are so annoying at this point
+
+c. I only really got notified when my specific question was answered, had to go online to see the other questions
+
+## Question 9:
+a. Uh no
+
+b. Yeah but I don't really need it at this point I'm a senior
+
+c. Nope wish I had
+
+## Question 10:
+a. Groupme or texting
+
+b. Anything I can get on my phone
+
+c. Probably texting or any app on my phone that has notifications like facebook messenger
+
+# User Stories
+From the questions and answers we can put together some user stories that will help focus and drive our development mindset.
+
+1. As a student in a class I want to be able to ask a class-related question and get some sort of feedback in 3o minutes or less.
+
+2. As a TA I want to force students to consult with their classmates before they come ask me a (usually) trivial question.
+
+3. As a Professor, I only really want to be bothered if neither a stuedent's peers, nor the TAs can help them.
+
+4. As a student, I want the relative experience of Piazza, but on my phone (preferably via text).
+
+5. As a student, if nobody can answer my question I at least would like a link to a helpful website.
+
+# Requirements
+Each requirement will be listed as (a), will be accompanied by a (b) that rationalizes the need for the requirement, and will be followed by a quick synopsis (c) of the proposed way in which the application will fullfill that requirement.
+
+1.
+
+  a. A text based application
+
+  b. Not only is this a requirement from the Professor, but it also directly emphathizes with users as seen in their responses to question 10 where they note that text messaging/phone communication is the most convenient and reliable mode of communication for them.
+
+  c. This will be accomplished using the twilio accounts from assignment 4 in conjunction with the base code that we already have from assignments 1-3, which correctly parses and handles incoming text messages of the correct format with the correct side effects.
+
+2.
+
+  a. Ensure that questions are first sent to classmates before resorting to alternatives for answers
+
+  b. As noted by the interviewee that was a TA (and by prior discussions with teachers and Professors from my past), a major annoyance is that students tend to ask questions to people far above the required heirarchical level needed for a sufficient response.
+
+  c. As noted in the overview, this will be accomplished by some sort of escalation protocol. For the full scale proposed application, this would take the form of classmates->TAs->Professors-> wikipedia escalation via a timer; however, for the 'stub' needed for demo purposes this may just take the form of one level of escalation (either from classmates->TA or classmates->wikipedia) via the same timer mechanism.
+
+3.
+
+  a. Ensure that set up for users is not lengthy or cumbersome.
+
+  b. The point of this application is to make an easier, more accessible version of a Piazza-esque system. Thus, not only should the messages be easily accessible for users (by texting it directly to them), but the set up should be as easy or easier than downloading an app on one's phone.
+
+  c. This will be done by adapting the 'add expert' functionality of the preexisting base code. In doing so set up for any individual (classmate, TA, or Professor) will be as easy as texting 'add <classmate, TA, or Professor>' to the appropriate phone number for the twilio bot.
+
+4.
+
+  a. For the full scale application, some sort of tangible response must be generated within a manageable timespan (~30 minutes)
+
+  b. As seen in the 'panic' noted in responses to Question 5, students are high stress individual. As a student myself, I know how disheartening and frightening it can be to have a question go unanswered for a long time (when you email a professor and they don't respond for a day). Thus, the application should give some sort of comforting (as comforting as a wikipedia page may be) response in 30 minutes or less.
+
+  c. This will be accomplished via the timeouts and escalation progression that was previously stated for the full scale application. By the time 30 minutes has passed, if no answer has been submitted, the question will have been asked to classmates, TAs, and Professors, and at the very least the bot will return the wikipedia page for the submitted topic.
+
+
+# Development Approach
+The below development approach used below is the best reflection of the steps I feel would be most effective in completing this project. The order chosen is designed so that one spends time considering the design and its components before beginning the engineering work. Ideally, the below approach will force the engineer to consider how the parts will interact before they begin engineering so that they do not realize flaws in their logic during the actual engineering process.
+
+In an attempt to be as thorough as possible, I will include in this development approach the development of the parts of the application that are already done (the base functions and the handlemsg functionality as well as the memstore, plus having a twilio account for testing purposes). The approach highlights the broad steps as well as their specific subparts.
+
+## Requirements Gathering
+1. Brainstorm a target population or a problem to tackle and identify the population that would benefit from a solution to that problem.
+
+2. Identify questions that will help clarify the problem in question as well as proposed solution-elements from population members.
+
+3.1. Collect answers to these questions from a sample of the population, understand their view of the problem and the key components that need to be addressed. These components become your requirements as seen in the above section.
+
+3.2. Distill these requirements and the feedback from the interviews into a handful of user stories for easy explanation and analysis of the solution.
+
+4. Identify a solution to this problem that seems consistent with your engineering capabilites and the timeframe in which you have to work.
+
+***From here on out the understanding is that the above steps were followed and that the decision was to pursue the concept identified in the overview section***
+
+## Architecture Design/Brainstorming
+At this stage you need to identify the architecture of the system you want to design. While brainstorming the architecture you should consider the inputs, outputs, and thus the the flow that your code should take to get from one to the other.
+
+### Code Flow
+The inputs to this problem will be a text message from a given user. Given that we already have the structure from assignments 1-3, it seems most practical to maintain the input structure from the existing codebase. Thus the input is a message from a given user (unique ID by phone number) in the format of a parsed message. This parsed message will have a < cmd > as the first word in the message. What follows will be the args. Depending on the command there may be 0 args, 1 arg, or multiple - in which case the second space-deliniated word would become the < topic >.
+
+The outputs to this problem will also be text messages. Depending on the command that was input, the output message may be simply confirming that their command was succssfully received, but may also be a response to a user's question from another user. In order to actually send the output of our clojure code to the users it needs to go to (whether that is sending a question to everyone it needs to or sending the answer from one user to the asker) we will need some sort of function to interact with the twilio api. Thus we will need a action-send-msgs function to communicate with the conveniently supplied code to interact with twilio.
+
+Given this input and output, we can now address the black box in the middle. Since our input relies primarily on the first word of the message, there will need to be some sort of router function to redirect the rest of the of the message to the appropriate function handler based on what the < cmd > is. Say hello to create-router in handle-message. So now given an input message we can correctly forward everything after the first word to the appropriate handler.
+
+Now what sort of commands do we want the user to be able to invoke?
+
+1. As per requirement #3, users need to be able to easily add themselves to the group that they belong to. So we will need a function that adds a given user to the list of members of the group of their choice. Thus we will have an **add-classmate**, a **add-TA**, and a **add-Prof** function (for the full application). *Ideally only TAs and Professors respectively would have access to their respective functions but that authority task is beyond the scope of this assignment*
+
+2. As per the nature of the application, classmates need to be able to pose a question to the class. Thus we will need a function handler that takes the rest of the words in the message, and asks a question for a given topic. Since there are three groups of people that we may need to ask one of four groups of people/wikipedia we will need a **ask-classmates**, a **ask-TAs**, a **ask-professors**, and a **ask-wiki** function. Notice that with this application as opposed to assignment 1-3, the topic is not necessary at this point for selecting experts on a given topic. Regardless of the topic the escalation of the question and the recipients of the question will be the same - topic is only important for the ask-wiki function. For the other three functions, the topic will merely serve as subject-line-esque component.
+
+3. Naturally, if a user asks a question another user will need to be able to answer that question. Thus there will be a universal **answer-question** function that allows a user to answer the most recent question that they have been asked. One clear limitation in this implementation is that only the most recent question will be answered, any older unanswered questions will be overwritten. Given more time for implementation this would be the first thing I would choose to address; however, given the time span that we have I do not believe I will be able to fix this in time.
+
+Also, although it was not explicitly stated above, it should be understood that each of the functions will do their respective error checking. Add will check that the < target-group > is a valid one, ask will verify the < target-group > and assure that there is both a topic and a remaining question after it, and answer will verify that a non-empty answer is returned as well as verifying that a question has been asked.
+
+Lastly, we will want to acknowledge that the system has received a given message and is acting on it. Thus our router/handler complex will need to not only execute the right set of functions as side-effects, but will not to also return some sort of message immediately to the sender of a command. Thus the return of any of the above functions needs to be two-fold, with both a response string as well as the actions that need to be subsequently taken by the system.
+
+In conclusion: Input text message -> router -> appropriate function based on < cmd > -> function executes with params -> response string & actions resulting from the command (actions may trigger subsequent functions).
+
+#### The Timer
+For the full scale application I would choose to have AWS Events trigger every minute or so to call a check-timeouts function that goes through and looks at every question's time stamp to see if its 10 minutes are up for escalation; however, using AWS Events costs money and is likely to exceed the week we have to develop this. Thus, for the demo I will just have the check-timeouts function be called directly by a user to trigger the checking of question timeouts and thus the triggering of an escalation.
+
+### Publicly Available Functions
+In summary of above, users should be able to invoke action from the system with the following functions/messages:
+
+1. add-< group > (add-classmate, add-TA, add-Professor): Should simply add the user to the given group (structurally articulated below).
+
+2. ask-classmates: users should be able to submit a question via a message formatted "ask-classmates < topic > < args >".
+
+3. answer-question: users can respond to the most recent question they have been texted by texting "answer < the-answer >".
+
+4. ***for demo only*** check-timeouts: manually trigger the system to check if any of the questions in the :questions map have reached their time limit and trigger the appropriate response.
+
+### Structural and Data Type Considerations
+Given the above codeflow we need to make some decisions about how we will represent various components as to be the most efficient, reusable, and extensible.
+
+1. Input message: since the input message is predictably broken apart, we can do this as a first step. This parsed-msg will have some predictable components - the < cmd > and the < args >. However, we may want to add other useful information to an incoming message such as the uniqueId of the user or we may want to extract the < topic > from the < args > for certain functions. So we need a flexible data type that can take advantage of keywords. Thus the best approach would be to store the parsed-msgs as a map of key value pairs using keywords.
+
+2. Storing the state of the system: this is a big one. The system as a whole has many interrelated moving parts and will thus need some sort of global state that is shared/available to various parts of the application at any given time. Given the immutability of clojure this is a larger task than it may originally seem. We need to keep track of the members of each of the 3 groups as well as the questions that have been asked of every single individual (so that they may ask them). Furthermore, we need a way to check if a given question has been answered within the time frame of its timer (10 minutes).
+
+Conveniently we have access to a clojure protocol for keyValue stores. The included functionality includes get, put, remove, and list. For our purposes we will need to use the also-provided memStore type that follows this protocol. This memStore merely acts like a global storage system, using a high-level map to sort information. In our application we will need to store our groups as well as the conversations and questions for each user. Using a map-based store this should be simple, denoting :classmates, :TAs, :Professors, :questions and :conversations as their own top level keys in the map.
+
+For each of the groups we do not need to store anything except for the identifier for an individual, so we merely store a list of the phoneNumbers of members of a given group as the value for a given top-level group key.
+
+For the conversation, we need to keep track of the most recent question any given user has been asked. However, we also need to know who asked the question. Thus the top level :conversation key will map to another map, where the key is any individual's uniqueId (phone number) and the value will be the question itself and the uniqueId of who asked it - so that the response can be sent to the correct individual.
+
+For the questions, we need to keep track of whether a given user's most recent question has been answered so that when the timer goes off we can either do nothing or escalate the question (or return the wikipedia link for the prototype). To do this the :questions key should map to another map where the key is a given userId and the value is both the :topic and the :time that the question is asked (in UTC) plus whatever limit (10 minutes for full app) we choose to apply. This way the check-timeouts function can merely iterate through the sequence generated by the :questions map and check if any of the :time 's have been passed yet. If yes, the system merely returns the wikipedia for the corresponding :topic to the given userId.
+
+### Estimations
+Now that we've identified the moving pieces and what our data structures might look like, lets take a look back at how long this might take. I will break this up into milestones to aid in the estimation
+
+1. Building the core handle-msg functionality for a simple one-group population, with add, ask, and answer enabled for that one group: understanding and building the base of an application can be time consuming and given my relative unfamiliarity with clojure at the start of this, I would estimate **2-3 weeks** of effort for this part. Lucky for us this part is already done.
+
+2. Modifying the above system to have a state-manager that supports the :questions field and up to 3 different groups of individuals, each of which have the ability to add themselves to a group and answer questions - and at least the first group has the ability to answer them: Given that I should have a good understanding of the storage system and the core functionality of the code generated in step 1, this part should not take too long to generate. I would estimate that **10-12 hours** of effort may be required as unforseen conflicts are likely to occur.
+
+3.1. Adding an AWS Event to reoccur every mintue or so to call check-timeouts: With no prior experience with AWS Events it is very uncertain as to how long setting this up might take me. Such uncertainty should be treated with cautious estimation and thus I will estimate a wide range of **10-15 hours** for this component.
+
+3.2. For the demo, setting up a manual trigger of check-timeouts (as well as coding check-timeouts): **5-10 hours** depending on the behavior of the mapping and the lookup as well as the use of UTC libraries.
+
+4. Extending the above step to include escalation from classmates-> TAs -> Professors -> wikipedia: while it seems like this may just be a case of successive iteration on step 3, there are likely to arise conflicts with the timers and the multiple stages of escalation. Thus I would estimate another **10-12 hours** of effort for this componenet.
+
+In total, from start to finish this project could take up to 4-5 weeks. Given that we already have step 1 in place, I would estimate that the prototype version will take a week and a half while the full version would take up to 3 weeks of consistent work to implement.
+
+## Core Component Implementation
+As the codeflow and data structures sections lay out the step by step desired architecture I will not dwell on that here. Here I will focus on the order in which these steps should be undertaken.
+
+1. Establish helper functions for parsing and sending messages to ease the larger functions.
+
+2.1. Set up the stores so that the functions you make have something to test against.
+
+2.2. Set up the handle-msg function and the router to cause the correct functions to be executed using the global state, and to easily view the return of these functions (makes testing much much easier).
+
+3. Write the add method. None of the others can be tested without a working add method.
+
+4. Write the ask method and then try to exract components from your store to see if the questions are being appropriately stored in the various spots they should be appearing.
+
+5. Write the answer method, making sure that the conversation store works in conjunction with this to reply to the correct person.
+
+6. Write the ask-wiki method to merely return a url based on the :topic of the parsed-msg.
+
+7. Add in the check-timeouts method to comb through the :questions map and check for expired questions.
+
+8. On finding an expired question, send a text to whomever asked the question with the wikipedia url for their given topic.
+
+The rest is beyond the scope of the demo stub
+
+9. Now rather than manually triggering the check-timeouts method via a text message, set up AWS Events to check every minute for you.
+
+10. Now rather than escalating straight to wikipedia, have the escalation go in the desired order of groups: classmates->TAs->Profs->wikipedia.
+
+## Integration With External Service
+
+### AWS Setup
+Follow the class instructions for getting set up with a class-grouped AWS account, or make your own by going to the AWS website.
+In AWS go to IAM and create a new user, giving them Administrator permissions and recording their access key as well as their secret. Set these in the appropriate environment variables (google it if you don't know how).
+
+### Twilio Setup
+The below steps are directly from Professor Whites instructions on assignment 4.
+
+1.Install the Serverless framework and all dependencies (NodeJs, etc.): https://serverless.com/framework/docs/providers/aws/guide/installation/
+
 2. Verify that the "sls" command is on your path and add it if it is not
+
 3. Run the command "lein deps" at the root of your project
+
 4. Create a Twilio account and enable 2-factor auth
-5. You will need to fund the account with $20
 
-   When you setup billing:
+5. Go to Twilio and buy an SMS-enabled phone number with a 615 area code and write down the number.
 
-   ```
-   WARNING: DO NOT ENABLE AUTO-RECHARGE ON YOUR ACCOUNT
+6. Go to Twilio settings and write down your live and test credentials
 
-            DO NOT ENABLE AUTO-RECHARGE ON YOUR ACCOUNT
+7. Run the command "lein deps" in this project
 
-            IF YOU DO, BAD THINGS CAN HAPPEN
+8. Create secure secrets for your Twilio credentials in AWS
 
-            YOU HAVE BEEN WARNED
-   ```
-
-   IMPORTANT:
-   -----------
-   At the end of the class, you should go and release this phone number and
-   cancel your Twilio account if you are no longer going to use it.
-
-6. Go to Twilio and buy an SMS-enabled phone number with a 615 area code
-   and write down the number.
-7. Go to Twilio settings and write down your live and test credentials
-8. Run the command "lein deps" in this project
-9. Create secure secrets for your Twilio credentials in AWS, by running these
-   commands (fill-in <...>):
-
-```
-sls secrets set --name twilio-prod-account-sid --text <your live sid> --region us-east-1
-sls secrets set --name twilio-prod-token --text <your live token> --region us-east-1
-sls secrets set --name twilio-test-account-sid --text <your test sid> --region us-east-1
-sls secrets set --name twilio-test-token --text <your test token> --region us-east-1
-```
-
-10. Verify that you did everything correctly by running this command
-    in the root of the project:
-
-```
+9. Verify that you did everything correctly by running this command in the root of the project:
 sls secrets validate
-```
 
-You should see output that looks like this:
+10. Run "sls deploy" in the root directory
 
-```
-Serverless: Targeting /..../asgnX/.serverless/asgnx.zip
-Serverless: Generating Serverless Secrets Config
-Serverless: Validating secrets
-Serverless: Secrets validated
-```
+11. Copy the endpoint URL for POST
 
-11. To learn more about serverless secrets management, see: https://github.com/trek10inc/serverless-secrets
+12. Create a "deploy.edn" file in the root folder of the project
 
-12. Set BucketName in serverless.yml to "cs4278-asgnx-state-<...>"(fill <...> with your own name). You must choose a
-    bucket name that is globally unique to AWS S3. If you do not choose a unique name, you will get the 
-    "bucket already exists" error described below.
-
-13. Set "s3/s3-keystore" on line 78 of lambda.cljs to the bucket name you set in step 12.
-
-14. Run "sls deploy" in the root directory and you should see something like this:
-
-```
-Serverless: Targeting /.../asgnX/.serverless/asgnx.zip
-Serverless: Generating Serverless Secrets Config
-Serverless: Serverless Secrets beginning packaging process
-Serverless: Writing .serverless-secrets.json
-Serverless: Validating secrets
-Serverless: Secrets validated
-Serverless: Adding environment variable placeholders for Serverless Secrets
-Serverless: Packaging service...
-Serverless: Executing "lein update-in :cljs-lambda assoc :functions '[{:name "asgnx-dev-handle-msg" :invoke asgnx.lambda/receive-message}]' -- cljs-lambda build :output /.../asgnX/.serverless/asgnx.zip :quiet"
-Serverless: Returning artifact path /.../asgnX/.serverless/asgnx.zip
-Serverless: Cleaning up .serverless-secrets.json
-Serverless: Uploading CloudFormation file to S3...
-Serverless: Uploading artifacts...
-Serverless: Validating template...
-Serverless: Updating Stack...
-Serverless: Checking Stack update progress...
-..............
-Serverless: Stack update finished...
-Service Information
-service: asgnx
-stage: dev
-region: us-east-1
-stack: asgnx-dev
-api keys:
-  None
-endpoints:
-  GET - https://abcxyz.execute-api.us-east-1.amazonaws.com/dev/msg
-  POST - https://defxyz.execute-api.us-east-1.amazonaws.com/dev/msg
-functions:
-  handle-msg: asgnx-dev-handle-msg
-Serverless: Removing old service versions...
-```
-
-15. Copy the endpoint URL for POST
-16. Create a "deploy.edn" file in the root folder of the project
-17. Insert a raw Clojure map in the file with keys for your endpoint and
-    phone number like this (replace these dummy values with yours!):
-
-```
+13. Insert a raw Clojure map in the file with keys for your endpoint and phone number like this (replace these dummy values with yours!):
 {:endpoint "https://abcxyz.execute-api.us-east-1.amazonaws.com/dev/msg"
  :phone-number "+1615xxxxxxx"}
-```
 
-16. Run the autograder with "lein test-refresh" and hope for this:
+## Testing
+Automated testing is not likely to be achieved within the time span of this assignment, so we will have to rely on live testing and hands on tests.
 
-```
-================================================
-               Estimated Score:
-================================================
+### Stepwise Testing
+Firstly, each step under "Core Component Implementation" should be followed by a self test by the developer wherein they use the REPL to mock a given store and test that certain functions (in conjunction with the router and handle-msg) have the desired effect on the store.
 
-|             :test | :score | :out-of |
-|-------------------+--------+---------|
-|   asgnx.core-test |   10.0 |      10 |
-| asgnx.deploy-test |   90.0 |      90 |
+Next, every step up through step 5 is conveniently tested within the test framework of assignment 3. So simply code against lein test-refresh to check your progress up through this point.
 
-Total:  100.00 / 100
-================================================
-Score submitted.
+After this you will need to check the output of the handle-msg function to see if the actions have triggered the desired effects. For the timers you will need to simply wait (may want to set the timer to a much lower time limit for testing purposes) before printing something indicative to the console output.
 
-Your actual score is calculated on the server and
-may be different than this score in some circumstances.
-The server score is considered the definitive score.
+To test the twilio integration you will need to switch the environment in handle-msg from test so that text messages are actually sent.
 
-Passed all tests
+### Trial Classroom
+When you think you have a final working version of this application (or at least the prototype), it is strongly advised that you test this with a sample group of people to mimic a classroom setting. A couple of runs of this should identify errors in implementation or, at the very least, what might be the best next steps for future iterations of this project.
 
-```
+## Deployment
+???????????? waiting on updated spec from Professor for windows Home
 
-## Assignment Spec
+## Demo Stub
+As noted throughout this document the scope of this idea is very large relative to the time we have to engineer it. Thus I will take this time to outline the capability that is being aimed for for the stubbed version needed for the demo date:
 
-These assignments are going to build the basis for a simple text messaging application
-to aid students in this course. In Assignment 4, we will deploy this application to
-Amazon Web Services and configure an inbound number for receiving text messages. At
-this point, you are only building out basic functions that will later be used to
-respond to text messages.
+- A text based app aimed at a specific classroom of students
+- Classmates, TAs, and Professors can all self-add via their respective functions as highlighted above
+- When a question is asked by a classmate, it will be texted to the rest of the class
+- Any member of the class that is texted a question may reply
+- If no reply is given in 10 minutes then a link to the wikipedia page for a given topic will be returned instead
+- No user should ask a new question before their previous question has been answered for the timer to work
 
-All assignments are graded on the basis of passing ALL of the tests for every prior
-assignment in addition to any new tests. If you break something that you did in a
-prior assignment (e.g., you have a regression), you will lose points. If you don't
-finish an assignment, you will need to complete it in order to get full credit
-for all subsequent assignments (real-world software development is built on accretion
-over time).
+### Demo Use Tutorial
+Below are a set of simple steps for running the demo (or for live testing with a fake classroom)
+1. Deploy the code to AWS for integration with Twilio (see the above section on deployment)
+2. Have your participants text "add-classmate" to the Twilio number (+16159083013)
+3.
 
-**No solutions will be released until after Asgn 3.**
+  a. Have one participant (the demoer) text in a question "ask < topic > < remainder of question >"
 
-If you do not complete an assignment or fail to get it to work completely, it
-is imperative that you ask questions and seek help.
+  b. The rest of the class should recieve the question if they have registered
 
-### Asgn 1
+4.
 
-Open `src/asgnx/core.cljc` in Atom and look for `Todo:` comments that are for
-Asgn 1. Complete all of the todos for the current assignment and leave the
-autograder running as you make changes to your code to see your score (see "To run the autograder" below).
+  a. After one minute has passed, have one participant text in the demo trigger for checking the timeout "check-timeouts"
 
-### Asgn 2
+  b. The person who asked the question should receive the link to the wikipedia page for their topic.
 
-Open `src/asgnx/core.cljc` in Atom and look for `Todo:`. Complete all of the todos
-for the current assignment and leave the autograder running as you edit to see your
-score (see "To run the autograder" below). In Asgn 2, you will also need to complete
-the `Todo:`s in `src/asgnx/kvstore.cljc`.
-
-### Asgn 3
-
-Starting in Assignment 3, you are going to extend your previous implementation to add
-functionality that allows people to pose questions to people that are registered
-as an expert on a given topic. You are still responsible for all of the original
-functionality (e.g., those tests still have to pass, no regressions allowed) and
-the new functionality. Your grade is calculated from all tests from the past
-assignments AND all the tests from the new assignment.
-
-#### Structure of the Stored State
-
-The application persists state between executions in a key / value store, which you
-can think of as a map that persists to disk. You can insert/update this map with the actions
-:assoc-in and :dissoc-in. 
-
-For example, the action:
-
-```clojure
-{:action :assoc-in :ks [:cooks "bob"] :v {:job "chef"}} 
-```
-
-This would update the stored state to conceptually look like this:
-
-```clojure
-{:cooks {"bob" {:job "chef"}}}
-```
-
-Another insert would further update the stored state:
-
-```clojure
-{:action :assoc-in :ks [:cooks "john"] :v {:job "line chef"}} 
-```
-
-resulting in the following stored state:
-
-
-```clojure
-{:cooks {"bob"  {:job "chef"}
-         "john" {:job "line chef"}}}
-```
-
-The state for the SMS experts / ask functionality is stored using a structure
-that looks like this:
-
-```clojure
-{:expert {
-      "parking" {
-                 "+15555555555"  {:whatever :data}
-                 "+15557777777"  {:whatever :data :about :expert}
-                 }
-       "food"    {
-                 "+15551212121"  {:whatever :data :about :expert}
-                 }
-          }
-                 
- :conversations {
-          "+15555555555" {:last-question "where to park?" :asker "+15554443210"}
-          "+15557777777" {:last-question "where to park?" :asker "+15554443210"}
- }}
-```
-
-The `:expert` section of the data uses keys that are the "topics" and the maps
-beneath the topics store the `user-id`s (phone numbers) of the experts on that
-topic. The data associated with the expert (the `info` parameter) is arbitrary
-and up to you -- it can even be an empty map for this assignment. 
-
-If you wanted to update the list of experts, you might want to use your `action-insert`
-function from prior work.
-
-The `:conversations` store information about the last question that was sent to
-an expert and who asked it. You decide the structure of the values that are mapped
-to the expert `user-id`s, but one suggested format is provided above. The most
-important part for whatever structure that you choose is that you store the phone
-number of the user that asked the last question sent to each expert. This information
-allows answers sent by an expert to be sent back to the original question asker.  
-
-If you wanted to update the list of conversations, you might want to use your `action-insert`
-function from prior work.
-
-#### Queries
-
-Each command is mapped to a query that retrieves data for it before its associated handler 
-function is invoked. The queries have been provided for you and are excerpted below:
-
-```clojure
-;; Don't edit!
-(defn experts-on-topic-query [state-mgr pmsg]
-  (let [[topic]  (:args pmsg)]
-    (list! state-mgr [:expert topic])))
-
-
-;; Don't edit!
-(defn conversations-for-user-query [state-mgr pmsg]
-  (let [user-id (:user-id pmsg)]
-    (get! state-mgr [:conversations user-id])))
-
-
-;; Don't edit!
-(def queries
-  {"expert" experts-on-topic-query
-   "ask"    experts-on-topic-query
-   "answer" conversations-for-user-query})
-```
-
-This code means that text messages with the "expert" command, such as "expert food", will
-be routed to the `experts-on-topic-query`. This query will then look up the list of keys
-in the stored state that are beneath `[:expert "food"]`. The keys will be what your 
-`state-keys` function returns, which will be a list of strings containing the `user-ids`
-of the experts mapped to that topic. The data from this query, which is the list of experts
-on the topic will then be passed to your `add-expert` and `ask-experts` functions in the
-`experts` parameter. All you need to do is to make sure that you insert experts into the
-stored state under the appropriate keys for the topics that they register for and the queries
-will take care of loading the data for your `add-expert` and `ask-experts` functions.
-
-Similarly, the `conversations-for-user-query` loads the saved state that is needed to 
-process "answer park in 24th ave garage" style responses from the experts. The query looks
-up the information about the last question sent to the answering expert and who asked it. The
-resulting data is then passed in as the `conversation` parameter in `answer-question`. The
-format of the conversation data is up to you but should include the information about the 
-`user-id` of the person that asked each expert their most recent question. Experts can
-answer their most recently asked question.
-
-
-#### Common Pitfalls
-
-A common error is returning a result from your handler function that is not in the
-right format. Your handler function must return a list with this format:
-
-```
-[ [..actions...] "output to text message sender" ]
-```
-
-The actions are the results of calling your various action-insert, action-send-msg,
-etc. functions from past assignments. 
-
-You must ensure that the `[...actions...]` are a single list of actions. This
-is an example of a possible return from a handler function:
-
-```
-[ [{:action :assoc-in :ks [:expert "foo"] {:last-asker "+15555555555"}}
-   {:action :assoc-in :ks [:expert "bob"] {:last-asker "+15555555555"}}]
-   "Your question was sent."  ]
-```
-
-If you do not use this format, you will fail the tests and see error messages
-like "expected: the blue bus" and "actual: what burger". If you have implemented
-a bunch of action :assoc-in and are wondering why they aren't working, there is a
-good chance they are being returned in the wrong format.
-
-Be careful of returning results in the following formats:
-
-```
-No list wrapping the actions:
-[  {:action :assoc-in :ks [:expert "foo"] {:last-asker "+15555555555"}}
-   "Your question was sent."  ]
-
-Nested lists in the actions:
-[  [[{:action :assoc-in :ks [:expert "foo"] {:last-asker "+15555555555"}}]
-    [{:action :assoc-in :ks [:expert "bob"] {:last-asker "+15555555555"}}]] 
-   "Your question was sent."  ]
-
-No single list of actions:
-[  {:action :assoc-in :ks [:expert "foo"] {:last-asker "+15555555555"}}
-   {:action :assoc-in :ks [:expert "bob"] {:last-asker "+15555555555"}} 
-   "Your question was sent."  ]
-```
-
-#### Sending Text Messages
-
-Use your `action-send-msg` and `action-send-msgs` functions to send text messages to
-someone other than the person that sent the current command.
-
-#### Parameters to Functions
-
-You may not have to use every parameter in every function. 
-
-#### What is `info`
-
-You can make info anything that you want.
-
-#### What is `conversation`
-
-See Queries.
-
-#### What is `experts`
-
-See Queries.
-
-
-### Asgn 4
-
-This assignment tests your ability to configure and deploy a cloud application
-built on Twilio, AWS Lambda, AWS S3, and AWS SSM. Complete the deployment using
-the steps above and get the asgnx.deploy-test to pass.
-
-Once you have successfully deployed the application and passed the tests, you
-can make changes and redeploy it to AWS by editing the source files and then
-running "sls deploy". The build tools will automatically, compile, package,
-and upload your code to AWS. The tools will also provision the AWS resources
-listed in serverless.yml.
-
-Finally, you should setup your Twilio phone number to delegate SMS to your
-Lambda function. To do this, go into Twilio, find your active phone numbers,
-select the number, and then set the "A MESSAGE COMES IN" webhook to the
-POST endpoint you copied earlier. Make sure "HTTP POST" is listed as the
-method after your endpoint.
-
-Finally, submit the "Asgn 4 SMS Integration" quiz on Brightspace so that the
-TA can test your SMS integration. Your final score is not produced via autograding
-for this piece of the assignment. Your final score is based on the autograding
-and verification that your SMS number is working and the integration is
-complete.
-
-
-## Running the Application CLI
-
-The application has been modified to provide a command line interface so that you
-can send fake text messages to the system to see how it will respond.
-
-You can invoke the `-main` function from a terminal by running:
-
-```
-lein run
-```
-
-You should then see the `CSx278` prompt:
-
-```
-CSx278:
-```
-
-Once you are DONE with Asgn 1, you should be able to type any of the following commands and
-see the output:
-
-```
-office <monday,tuesday,wednesday,thursday,friday,saturday,sunday>
-homepage
-welcome <name>
-quit
-
-;; After Asgn 3
-expert <expert-id> <topic> <expert-info>
-ask <topic> <question>
-answer <answer>
-```
-
-Here is a sample session with a working version of the app:
-
-```clojure
-CSx278: homepage
-=========================================
-  Processing:" homepage " from console_user
-  Router: #object[asgnx.core$create_router$fn__13198 0x65031f2 asgnx.core$create_router$fn__13198@65031f2]
-  Parsed msg: {:cmd homepage, :args (), :user-id console_user}
-  Read state: {}
-  Hdlr: #object[asgnx.core$stateless$fn__13140 0x6dad3964 asgnx.core$stateless$fn__13140@6dad3964]
-  Hdlr result: [[] https://brightspace.vanderbilt.edu/d2l/home/85892]
-  Processing actions: []
-  Action results: []
-=========================================
-out =>  https://brightspace.vanderbilt.edu/d2l/home/85892
-CSx278: welcome bob
-=========================================
-  Processing:" welcome bob " from console_user
-  Router: #object[asgnx.core$create_router$fn__13198 0x65036760 asgnx.core$create_router$fn__13198@65036760]
-  Parsed msg: {:cmd welcome, :args (bob), :user-id console_user}
-  Read state: {}
-  Hdlr: #object[asgnx.core$stateless$fn__13140 0x19814318 asgnx.core$stateless$fn__13140@19814318]
-  Hdlr result: [[] Welcome bob]
-  Processing actions: []
-  Action results: []
-=========================================
-out =>  Welcome bob
-CSx278: quit
-nil
-```
-The "CSx278:" is the prompt for you to type a command. The "out =>" is the final output
-that was produced. Everything between "=================" is debugging messages that have been added
-to help you find errors. You should look at how these messages are printed out and
-use the same types of techniques in your own code when you can't figure out why
-something isn't working. For now, "println" is your friend. We will use a more
-sophisticated logger in later work.
-
-
-### Running a REPL:
-
-It is extremely useful to create a REPL and connect it to from Atom. This project is preconfigured
-with the dependencies needed to connect to your editor.
-To start a REPL and evaluate code:
-
-```
-lein repl
-```
-
-You should see something like this printed out:
-
-```
-nREPL server started on port 54404 on host 127.0.0.1 - nrepl://127.0.0.1:54404
-REPL-y 0.3.7, nREPL 0.2.13
-Clojure 1.9.0
-Java HotSpot(TM) 64-Bit Server VM 1.8.0_131-b11
-    Docs: (doc function-name-here)
-          (find-doc "part-of-name-here")
-  Source: (source function-name-here)
- Javadoc: (javadoc java-object-or-class-here)
-    Exit: Control+D or (exit) or (quit)
- Results: Stored in vars *1, *2, *3, an exception in *e
-```
-
-Once you see this message, open the `src/asgnx/core.clj` file and run the
-command `Proto Repl: Remote Nrepl Connection` and filling in `localhost` and
-the port that was printed out when the repl started. On Mac, the keymap you were
-provided bound this command to "cmd + r". On Windows, it should be bound to
-"ctrl + r". You can also invoke it through the command palette with "cmd + m" on
-Mac or "ctrl + m" on Windows.  
-
-Leave the REPL running. You do not need to terminate it. If you never close your
-REPL, you can connect to it over and over instantly in Atom. If you close your
-REPL in the terminal by killing the "lein repl" command, you will have to restart
-it each time and it will take longer.
-
-Once connected, you should see a new pane open and then eventually "Refresh complete".
-At this point, you can evaluate code in one of three ways:
-
-1. You can type code into the new window and then hit "shift + enter"
-2. You can place your cursor after a line of code in a Clojure file and use either
-  "cmd + enter" on Mac or "ctrl + enter" on Windows to evaluate the preceding
-  line. The evaluation results will be shown inline next to the cursor. Any
-  printlns will show up in the REPL window.
-3. You can use Protorepl's "Proto Repl: Autoeval File" to continuously execute
-   every statement in a file as you type.
-
-The general workflow to experiment with some code is:
-
-1. Open the file to experiment with
-2. Use the "Proto Repl: Load Current File" command to evaluate it, which
-   is "cmd + l" on Mac and "ctrl + c" on Windows.
-3. Type in code and execute it with "cmd + enter" or "ctrl + enter"
-
-## Reading Tests as Specs
-
-The tests in this application serve as a more detailed specification of what you
-need to do than the textual descriptions in the comments. It is essential that you
-learn to read tests (and later write them). A basic Clojure test has the form:
-
-```clojure
-(deftest something-test
-  (testing "a message describing the point of the test")
-    (is something-that-should-be-true)
-    (is something-else-that-should-be-true)
-    (is another-thing-that-should-be-true)
-```
-
-The basic convention is that tests for the Clojure source file src/foo/xyz.clj
-will be contained in a test test/foo/xyz_test.clj. For example, the tests for
-src/asgnx/core.cljc are contained in test/asgnx/core_test.clj. You can use this
-naming convention when looking for the tests for a bit of code.
-
-For each part of an assignment, you need to find the tests that correspond to
-the functions you are working on. Each `is` statement in a test describes
-an expected outcome of executing your code. You should read through each `is`
-and incrementally read and understand them. After digesting each `is`, update
-your code to try and make sure that the statement passes when the autograder
-is run.
-
-For example, for Asgn 1, the very first test is the `words-test`:
-
-```clojure
-(deftest words-test
-  (testing "that sentences can be split into their constituent words"
-    (is (= ["a" "b" "c"] (words "a b c")))
-    (is (= [] (words "   ")))
-    (is (= [] (words nil)))
-    (is (= ["a"] (words "a")))
-    (is (= ["a"] (words "a ")))
-    (is (= ["a" "b"] (words "a b")))))
-```
-
-The first `is` statement checks that invoking `(words "a b c")` produces the
-output ["a" "b" "c"]. If your code does not produce the expected output, the
-test will fail and tell you that the `expected` output was `["a" "b" "c"]` and
-that your `actual` output was something else. Each test is a specification for
-something that your code has to do in order to receive full credit.
-
-You must read and understand every test. If you are having trouble passing a
-test, start a REPL and connect it to your code. Then, copy the part of the
-test to the right of the `is` statement and evaluate it (you may need to load
-your code and some namespaces). Play around with your code in the REPL until
-you can pass the test.
-
-## Running Tests & Grading
-
-The project includes an automated grading system (an autograder) that will test your
-code, print your estimated score, and submit the score/code to the instructor. The
-grading/submission process is designed to be continuous. You should start the autograder
-and leave it running. Each time you make a change to a file, the autograder will be run
-and the updated code submitted. You will receive credit for your highest score, even
-if you break something and your score goes down -- so make sure and leave the autograder
-running!
-
-Most of the time, you want to leave the autograder running. It will automatically execute and
-grade all of your code every time that you make a change and show you the output in the terminal.
-You can certainly interactively test with a REPL to see what specific lines of code do or aid
-in debugging, but the autograder should also be run separately to continuously test how your
-code performs.
-
-  1. Open a terminal (or Git Bash Shell) and change to the root of the project
-  2. Run `lein test-refresh`
-  3. If this is the first time you have run the autograder, it will ask you to login
-     using the credentials that you created in Step 5 of the installation instructions.
-  4. After logging in successfully, you should see "authenticated as" printed with
-     your name / info.
-  5. The auto grader will test your code, estimate your score, and submit it to the server.
-  6. LEAVE THE AUTOGRADER RUNNING! Late submissions will never be accepted since there is
-     no reason not to run the autograder continuously.
-  7. After each change you save, you will get feedback on your code to see how your score is
-     progressing. You will also not have to worry about forgetting to turn your code in since
-     it will happen automatically each time.
-
-  A successful run of the autograder will look like this:
-
-```
-*********************************************
-*************** Running tests ***************
-:reloading (autograder.reporter)
-WARNING: name already refers to: #'clojure.core/name in namespace: autograder.reporter, being replaced by: #'autograder.reporter/name
-Authenticated as: {:sub ...., :email_verified true, :name ..., :email ..., :username ....}
-SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
-SLF4J: Defaulting to no-operation (NOP) logger implementation
-SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
-
-==================================================
-             Grading Your Solution
-=================================================
-Name:  ....
-Testing  #'asgnx.core-test/create-router-test
-Testing  #'asgnx.core-test/office-hours-for-day-test
-Testing  #'asgnx.core-test/formatted-hours-test
-Testing  #'asgnx.core-test/cmd-test
-Testing  #'asgnx.core-test/handle-message-test
-Testing  #'asgnx.core-test/args-test
-Testing  #'asgnx.core-test/parsed-msg-test
-Testing  #'asgnx.core-test/words-test
-================================================
-               Estimated Score:
-================================================
-
-|           :test | :score | :out-of |
-|-----------------+--------+---------|
-| asgnx.core-test |  100.0 |     100 |
-
-Total:  100.00 / 100
-================================================
-Score submitted.
-
-Your actual score is calculated on the server and
-may be different than this score in some circumstances.
-The server score is considered the definitive score.
-
-Passed all tests
-Finished at 12:53:08.788 (run time: 3.386s)
-
-```
-
-## The Definitive Score
-
-After each successful submission, you will see this message:
-
-```
-Score submitted.
-
-Your actual score is calculated on the server and
-may be different than this score in some circumstances.
-The server score is considered the definitive score.
-```
-
-Why doesn't the printed score count? Your code changes are all sent to the server
-and your actual code is compiled and run against the tests. There are a number of
-cases where the code may score higher on your machine than on the server, such as:
-1) code that is hardcoded to assumptions on your machine (e.g., it worked on my
-machine!); 2) test cases that are accidentally or maliciously changed locally
-causing an inflated score; 3) strange compilation / runtime errors that lead to
-tests passing when they should not. In all cases, the server-produced score is what
-will be used.
-
-
-## Errors
-
-You may see these types of errors when your code is tested:
-
-  1. Errors - indicate assertions in the tests that are not passing (e.g., implementation issues
-     in your code that prevent it from meeting the assignment spec).
-
-     Errors will look like this:
-
-     ```
-     Testing  #'asgn1.core-test/foo-test
-
-     ERROR in (foo-test) (core_test.clj:41)
-     @Step4
-     expected: 1
-       actual: (0)
-     ```
-
-     The expected value is the correct output. The actual value is what your
-     code actually produced as output. If you are confused about a failure, you should
-     look at the source file and line number in the `test` folder (e.g., `test/asgn1/core_test.clj`
-     line 41 in the foo-test function).
-
-  2. Failures - indicate that your code is throwing unexpected exceptions.
-
-     Failures will look like this:
-
-```
-FAIL in (foo-test) (Numbers.java:163)
-@Step4
-
-expected: (= 0 (foo [5 6 1 0]))
-  actual: #<java.lang.ArithmeticException@62a153d3 java.lang.ArithmeticException: Divide by zero>
-
-                                     clojure.main.main         main.java:   37
-                                                   ...                        
-                                     clojure.main/main          main.clj:  387
-                                     clojure.main/main          main.clj:  424
-                                 clojure.main/null-opt          main.clj:  345
-                               clojure.main/initialize          main.clj:  311
-                                 clojure.main/init-opt          main.clj:  280
-                              clojure.main/load-script          main.clj:  278
-                                                   ...                        
-                                         user/eval4881         REPL Input     
-          com.jakemccrary.test-refresh/monitor-project  test_refresh.clj:  255
-       com.jakemccrary.test-refresh/monitor-project/fn  test_refresh.clj:  270
-                com.jakemccrary.test-refresh/run-tests  test_refresh.clj:  177
-       com.jakemccrary.test-refresh/run-selected-tests  test_refresh.clj:  162
-com.jakemccrary.test-refresh/suppress-unselected-tests  test_refresh.clj:  125
-    com.jakemccrary.test-refresh/run-selected-tests/fn  test_refresh.clj:  164
-                                    clojure.core/apply          core.clj:  657
-                                                   ...                        
-                                clojure.test/run-tests          test.clj:  767 (repeats 2 times)
-                                    clojure.core/apply          core.clj:  659
-                                                   ...                        
-                                   clojure.core/map/fn          core.clj: 2747
-                                  clojure.test/test-ns          test.clj:  757
-                            clojure.test/test-all-vars          test.clj:  736
-                                clojure.test/test-vars          test.clj:  730
-                          clojure.test/default-fixture          test.clj:  686
-                             clojure.test/test-vars/fn          test.clj:  734
-                          clojure.test/default-fixture          test.clj:  686
-                          clojure.test/test-vars/fn/fn          test.clj:  734
-                                 clojure.test/test-var          test.clj:  716
-                              clojure.test/test-var/fn          test.clj:  716
-                                    asgn1.core-test/fn     core_test.clj:   41
-                                        asgn1.core/foo          core.clj:   40
-                                                   ...                        
-java.lang.ArithmeticException: Divide by zero
-```
-
-A special printer is used to print failures in reverse order of normal stack traces.
-The last and probably most relevant line will be at the bottom. If the last line is not
-in your code, you should walk sequentially up the list of files/line numbers until you
-find code that you wrote. You should start debugging from there. The left column shows
-the function that was executing, the middle column shows the file name, and the right
-column is the line number.
-
-In this case, the code on line 40 of src/asgn1/core.clj thre a "Divide by zero" exception.
-
-
-  3. Grading / Submission Errors - your code could not be submitted to the autograding server --
-     email the instructor the error message and ensure that you have an Internet connection
-
-     If you don't have an Internet connection, connect to the Internet and try again. You do
-     not need to email the instructor in this case.
-
-     A grading / submission error should be rare. Most of the time, these errors will be caused
-     when there is not an Internet connection. These types of grading / submission errors will
-     be followed by this message:
-
-```
-===========================================
-               WARNING                     
-Unable to submit the assignment for grading.
-
-Please save the ENTIRE expcetion stack
-trace above and include it in any emails
-to the instructor.
-===========================================
-```
-
-  4. Compilation Errors - code that doesn't compile gets zero credit
-
-     Compilation errors will look like this:
-
-```
-    :error-while-loading asgn1.core
-
-    Error refreshing environment: java.lang.RuntimeException: Map literal must contain an even number of forms, compiling:(asgn1/core.clj:40:14)
-    Finished at 12:40:26.351 (run time: 0.142s)     
-```
-
-You should go to the file / line number specified (e.g., src/asgn1/core.clj line 40) and fix
-the compilation error. No tests will be run and you will get a zero if your code can't be
-compiled.
-
-  5. Deploy Errors - bucket already exists.
-  
-  The name of an S3 bucket must be globally unique. If the bucket name you use in (serverless.yml/ lambda.cljs) already exists in S3, you will get the following error:
-
-```
-Serverless: Operation failed!
- 
-  Serverless Error ---------------------------------------
- 
-  An error occurred: StateBucket - cs4278-asgnx-state already exists.
-```
-  You can correct this error by choosing a bucket name that isn't already in use.
-
-
-
-### Bugs
-
-Please let the instructor know ASAP if you encounter assignment or autograder bugs.
-
-### Reading
-
-You should read and understand all of the course reading material that is due before
-the assignment due date. In particular, you need to understand:
-
-  Clojure for the Brave and True Through Chapter 3: https://www.braveclojure.com/
-
-Note: The Emacs installation instructions in Clojure for the B&T are not being used. Use the
-      leiningen instructions in "Launching a basic Repl".
-
-## Protorepl Keyboard Shortcuts
-
-Mac:
-```
-cmd + enter = Execute the block of code in front of the cursor
-cmd + r     = Connect to a remote REPL
-cmd + l     = Load the current file into the REPL
-cmd + m     = Open the Atom command palette which can be used to run any  
-              command
-cmd + p     = Open a file in the current project
-cmd + o     = Open a file
-```
-
-Windows:
-```
-ctrl + enter = Execute the block of code in front of the cursor
-ctrl + r     = Connect to a remote REPL
-ctrl + l     = Load the current file into the REPL
-ctrl + m     = Open the Atom command palette which can be used to run any  
-              command
-ctrl + p     = Open a file in the current project
-ctrl + o     = Open a file
-```
-
-The typical usage to connect to a REPL would be:
-
-1. Open a Clojure file
-2. Make sure you have launched a REPL for the current project in the terminal
-3. cmd + r (fill in the info to connect to the repl)
-4. cmd + l (load the current file so every function is available)
-5. cmd + enter (after some form you want to evaluate / play with)
-
-
-## Common Exceptions and What they Mean
-
-### Unable to resolve symbol
-
-If you attempt to refer to something that hasn't been defined, such as a method
-or variable that doesn't exist, you will get an error like this:
-
-```clojure
-java.lang.RuntimeException: Unable to resolve symbol: foo in this context
-clojure.lang.Compiler$CompilerException: java.lang.RuntimeException: Unable to resolve symbol: foo in this context, compiling:(/Users/jules/Dev/workspaces/vandy/CS4278-2018-Asgns/asgnX/src/asgnx/core.cljc:1:1)
-```
-
-Look at the "Unable to resolve symbol: foo" and figure out what "foo" you are
-refering to that hasn't been defined.
-
-Another common reason for these errors is that you are trying to use a function in
-another namespace that hasn't been required correctly.
-
-### cannot be cast to clojure.lang.Ifn
-A common error is attempting to invoke a function like this:
-
-```clojure
-(foo a b)
-```
-
-Where `foo` is not a function. For example, this code:
-
-```clojure
-(3 1 2)
-```
-
-The number `3` is not a function and cannot be invoked. This will produce an
-error message that looks like:
-
-```clojure
-java.lang.ClassCastException: java.lang.Long cannot be cast to clojure.lang.IFn
-```
-
-The error message will vary based on the "type" of the thing that you try to
-invoke as a function. For example, trying to invoke a string as a function will
-produce:
-
-```clojure
-java.lang.ClassCastException: java.lang.String cannot be cast to clojure.lang.IFn
-```
-
-
-## License
-
-Copyright © 2018 Jules White
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+5. If someone had already answered the question then no wiki link should have been returned.
