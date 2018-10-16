@@ -269,7 +269,7 @@
 ;;
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
-;; check 
+;; check
 (defn classmates-unregister [clssmates id] [(action-remove [:classmate id])])
 
 (defn classmates-question-msg [classmates question-words]
@@ -459,12 +459,12 @@
   (if (empty? questions) [[] "There are no pending questions at this time."]
     [(into [] (reduce-kv (fn [m asker-id v] (if (> (get (get questions asker-id) :time) time) m (conj m (action-send-msg asker-id "question manually responded via timeout")))) () questions)) (str (get (get questions user-id) :time) "manually triggered: checking for timed out questions, the current time is " time)])))
 
-(defn list-questions [questions pmsg] [[] (str questions)])
+(defn list-questions [questions pmsg] [[] (str "list of questions: " questions)])
 
 (defn questions-timestamp-query [state-mgr pmsg]
   (get! state-mgr [:questions]))
 
-(defn all-state [full-state pmsg] [[] (str "questions: " (questions-timestamp-query full-state pmsg))])
+(defn all-state [full-state pmsg] [[] (str (questions-timestamp-query full-state pmsg))])
 
 ;; Don't edit!
 (defn stateless [f]
