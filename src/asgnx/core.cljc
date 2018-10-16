@@ -269,7 +269,7 @@
 ;;
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
-;;
+;; check 
 (defn classmates-unregister [clssmates id] [(action-remove [:classmate id])])
 
 (defn classmates-question-msg [classmates question-words]
