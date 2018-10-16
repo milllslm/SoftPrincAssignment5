@@ -61,7 +61,7 @@
 
                              :env {:dev true}}}
 
-            :main asgnx.cli 
+            :main asgnx.cli
 
             :cljsbuild
             {:builds {:lambda

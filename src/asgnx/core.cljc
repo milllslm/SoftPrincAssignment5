@@ -1,5 +1,6 @@
 (ns asgnx.core
   (:require [clojure.string :as string]
+            [asgnx.timestamp :as timestamp]
             [clojure.core.async :as async :refer [go chan <! >!]]
             [asgnx.kvstore :as kvstore
              :refer [put! get! list! remove!]]))
@@ -148,7 +149,7 @@
 ;; See the office-hours-for-day-test in test/asgnx/core_test.clj for the
 ;; complete specification.
 ;;
-(defn office-hours [{:keys [args cmd]}]
+(defn office-hours [{:keys [args]}]
  (let [day (first args)]
   (if (contains? instructor-hours day)
     (formatted-hours (get instructor-hours day))
@@ -231,11 +232,11 @@
 
 ;; Asgn 3.
 ;;
-;; @Todo: Create a function called "experts-register"
-;; that takes the current application `state`, a `topic`
-;; the expert's `id` (e.g., unique name), and information
-;; about the expert (`info`) and registers them as an expert on
-;; the specified topic. Look at the associated test to see the
+;; @Todo: Create a function called "classmates-register"
+;; that takes the current application `state`,
+;; the classmate's `id` (e.g., unique name), and information
+;; about the classmate (`info`) and registers them as a classmate.
+;;Look at the associated test to see the
 ;; expected function signature.
 ;;
 ;; Your function should NOT directly change the application state
@@ -246,17 +247,19 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;;
-(defn experts-register [experts topic id info]
-  [(action-insert [:expert topic id ] info)])
+(defn classmates-register [classmates id info]
+  [(action-insert [:classmates id] info)])
+
+
 
 
 
 ;; Asgn 3.
 ;;
-;; @Todo: Create a function called "experts-unregister"
-;; that takes the current application `state`, a `topic`
-;; and the expert's `id` (e.g., unique name) and then
-;; removes the expert from the list of experts on that topic.
+;; @Todo: Create a function called "classmates-unregister"
+;; that takes the current application `state`,
+;; and the clsasmate's `id` (e.g., unique name) and then
+;; removes the classmate from the list of classmates.
 ;; Look at the associated test to see the expected function signature.
 ;;
 ;; Your function should NOT directly change the application state
@@ -267,22 +270,22 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;;
-(defn experts-unregister [experts topic id] [(action-remove [:expert topic id])])
+(defn classmates-unregister [clssmates id] [(action-remove [:classmate id])])
 
-(defn experts-question-msg [experts question-words]
-  (str "Asking " (count experts) " expert(s) for an answer to: \""
+(defn classmates-question-msg [classmates question-words]
+  (str "Asking " (count classmates) " classmate(s) for an answer to: \""
        (string/join " " question-words) "\""))
 
 ;; Asgn 3.
 ;;
-;; @Todo: Create a function called "ask-experts"
+;; @Todo: Create a function called "ask-classmates"
 ;; that takes two parameters:
 ;;
-;; 1. the list of experts on the topic
+;; 1. the list of classmates
 ;; 2. a parsed message with the format:
 ;;    {:cmd "ask"
 ;;     :user-id "phone number that sent the message"
-;;     :args [topic question-word1 question-word2 ... question-wordN]}
+;;     :args [question-word1 question-word2 ... question-wordN]}
 ;;
 ;; The sender of the message will be identified by their phone number
 ;; in the user-id parameter. This is the phone number that you will need
@@ -303,19 +306,19 @@
 ;; [[actions...] "response to asker"]
 ;;
 ;; The actions in the list are the *side effects* that need to take place
-;; to ask the question (e.g., sending messages to the experts). The string
+;; to ask the question (e.g., sending messages to the classmates). The string
 ;; is the response that is going to be sent back to the person that asked
-;; the question (e.g. "Asking 2 expert(s) for an answer to ....").
+;; the question (e.g. "Asking 2 classmates(s) for an answer to ....").
 ;;
 ;; The correct string response to a valid question should be produced with
-;; the `experts-question-msg` function above.
+;; the `classmates-question-msg` function above.
 ;;
 ;; Think about how you are going to figure out where to route messages
-;; when an expert answers (see the conversations query) and make sure you
+;; when a classmate answers (see the conversations query) and make sure you
 ;; handle the needed side effect for storing the conversation state.
 ;;
-;; If there are no registered experts on a topic, you should return an
-;; empty list of actions and "There are no experts on that topic."
+;; If there are no registered classmates, you should return an
+;; empty list of actions and "You have no classmates."
 ;;
 ;; If there isn't a question, you should return "You must ask a valid question."
 ;;
@@ -332,16 +335,16 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;;
-(defn ask-experts [experts {:keys [args user-id]}]
-  (if (empty? (rest args))
+(defn ask-classmates [classmates {:keys [args user-id]}]
+  (if (empty? args)
     [[] "You must ask a valid question."]
-    (if (empty? experts)
-      [[] "There are no experts on that topic."]
-      [(into [] (concat (action-inserts [:conversations] experts user-id)
-                 (action-send-msgs experts (clojure.string/join " " (rest args)))))
-       (experts-question-msg experts (rest args))])))
+    (if (empty? classmates)
+      [[] "You have no classmates."]
+      [(into [] (concat (action-inserts [:conversations] classmates user-id) [(action-insert [:questions] {user-id {:topic (first args) :time (+ (/ 1 60) (timestamp/date-time-now-str))}})]
+                 (action-send-msgs classmates (clojure.string/join " " (rest args)))))
+       (classmates-question-msg classmates args)])))
 
-
+;;[(action-insert [:questions] {user-id {:topic (first args) :time (+ (/ 1 60) (timestamp/date-time-now-str))}})]
 
 
 
@@ -352,11 +355,11 @@
 ;; that takes two parameters:
 ;;
 ;; 1. the last conversation describing the last question that was routed
-;;    to the expert
+;;    to the classmates
 ;; 2. a parsed message with the format:
 ;;    {:cmd "ask"
 ;;     :user-id "+15555555555"
-;;     :args [topic answer-word1 answer-word2 ... answer-wordN]}
+;;     :args [answer-word1 answer-word2 ... answer-wordN]}
 ;;
 ;; The parsed message is generated by breaking up the words in the ask
 ;; text message. For example, if someone sent the message:
@@ -364,8 +367,8 @@
 ;; "answer joey's house of pizza"
 ;;
 ;; The conversation will be data that you store as a side-effect in
-;; ask-experts. You probably want this data to be information about the
-;; last question asked to each expert. See the "think about" comment above.
+;; ask-classmates. You probably want this data to be information about the
+;; last question asked to each classmate. See the "think about" comment above.
 ;;
 ;; The parsed message would be:
 ;;
@@ -374,15 +377,15 @@
 ;;  :args ["joey's" "house" "of" "pizza"]}
 ;;
 ;; This function needs to return a list with two elements:
-;; [[actions...] "response to expert answering"]
+;; [[actions...] "response to classmate answering"]
 ;;
 ;; The actions in the list are the *side effects* that need to take place
 ;; to send the answer to the original question asker. The string
-;; is the response that is going to be sent back to the expert answering
+;; is the response that is going to be sent back to the classmate answering
 ;; the question.
 ;;
 ;; Think about how you are going to figure out where to route messages
-;; when an expert answers (see the conversations query) and make sure you
+;; when a classmate answers (see the conversations query) and make sure you
 ;; handle the needed side effect for storing the conversation state.
 ;;
 ;; Why this strange architecture? By returning a list of the actions to take,
@@ -402,43 +405,44 @@
   [conversation {:keys [args]}]
  (cond
    (empty? conversation) [[] "You haven't been asked a question."]
-   (empty? (rest args)) [[] "You did not provide an answer."]
-   :else [[(action-send-msg conversation (clojure.string/join " " args))]  "Your answer was sent."]))
+   (empty? args) [[] "You did not provide an answer."]
+   :else [[(action-send-msg conversation (clojure.string/join " " args))]
+          "Your answer was sent."]))
 
 
 ;; Asgn 3.
 ;;
-;; @Todo: Create a function called "add-expert"
+;; @Todo: Create a function called "add-classmate"
 ;; that takes two parameters:
 ;;
-;; 1. the current list of experts on the topic
+;; 1. the current list of classmates
 ;; 2. a parsed message with the format:
-;;    {:cmd "expert"
+;;    {:cmd "classmate"
 ;;     :user-id "+15555555555"
-;;     :args [topic]
+;;     :args []
 ;;
 ;;
-;; The parsed message is generated by breaking up the words in the expert
+;; The parsed message is generated by breaking up the words in the classmate
 ;; text message. For example, if someone sent the message:
 ;;
-;; "expert food"
+;; "classmate"
 ;;
 ;; The parsed message would be:
 ;;
-;; {:cmd "expert"
+;; {:cmd "classmate"
 ;;  :user-id "+15555555555"))
-;;  :args ["food"]}
+;;  :args []}
 ;;
-;; This function needs to add "sara" to the list of experts on "food" and
+;; This function needs to add "sara" to the list of classmates on "food" and
 ;; associate her phone number with her ID.
 ;;
 ;; This function needs to return a list with two elements:
-;; [[actions...] "response to the person adding themselves as an expert"]
+;; [[actions...] "response to the person adding themselves as a classmate"]
 ;;
 ;; The actions in the list are the *side effects* that need to take place
-;; to add the person as an expert on the topic (hint: result of calling experts-register). The string
-;; is the response that is going to be sent back to the person adding themselves
-;; as an expert.
+;; to add the person as a classmate (hint: result of calling classmates-register).
+;;The string is the response that is going to be sent back to the person adding themselves
+;; as a classmate.
 ;;
 ;; You should look at `handle-message` to get an idea of the way that this
 ;; function is going to be used, its expected signature, and how the actions
@@ -446,9 +450,21 @@
 ;;
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
-(defn add-expert [experts {:keys [args user-id]}]
-  [(experts-register experts (first args) user-id {:job "cook"})
-   (str user-id " is now an expert on " (first args) ".")])
+(defn add-classmate [classmates {:keys [user-id]}]
+  [(classmates-register classmates  user-id {:job "cook"})
+   (str user-id " is now a classmate! ")])
+
+(defn check-timeouts [questions {:keys [user-id]}]
+ (let [time (timestamp/date-time-now-str)]
+  (if (empty? questions) [[] "There are no pending questions at this time."]
+    [(into [] (reduce-kv (fn [m asker-id v] (if (> (get (get questions asker-id) :time) time) m (conj m (action-send-msg asker-id "question manually responded via timeout")))) () questions)) (str (get (get questions user-id) :time) "manually triggered: checking for timed out questions, the current time is " time)])))
+
+(defn list-questions [questions pmsg] [[] (str questions)])
+
+(defn questions-timestamp-query [state-mgr pmsg]
+  (get! state-mgr [:questions]))
+
+(defn all-state [full-state pmsg] [[] (str "questions: " )])
 
 ;; Don't edit!
 (defn stateless [f]
@@ -460,9 +476,13 @@
              "welcome"  (stateless welcome)
              "homepage" (stateless homepage)
              "office"   (stateless office-hours)
-             "expert" add-expert
-             "ask" ask-experts
-             "answer"  answer-question})
+             "classmate" add-classmate
+             "ask" ask-classmates
+             "answer"  answer-question
+             "check" check-timeouts
+             "questions" list-questions
+             "all" all-state})
+
 
 ;; Asgn 3.
 ;;
@@ -474,10 +494,8 @@
 
 
 ;; Don't edit!
-(defn experts-on-topic-query [state-mgr pmsg]
-  (let [[topic]  (:args pmsg)]
-    (list! state-mgr [:expert topic])))
-
+(defn classmates-query [state-mgr pmsg]
+    (list! state-mgr [:classmates]))
 
 ;; Don't edit!
 (defn conversations-for-user-query [state-mgr pmsg]
@@ -485,11 +503,18 @@
     (get! state-mgr [:conversations user-id])))
 
 
+
+(defn all-query [state-mgr pmsg] state-mgr)
+
+
 ;; Don't edit!
 (def queries
-  {"expert" experts-on-topic-query
-   "ask"    experts-on-topic-query
-   "answer" conversations-for-user-query})
+  {"classmate" classmates-query
+   "ask"    classmates-query
+   "answer" conversations-for-user-query
+   "check" questions-timestamp-query
+   "questions" questions-timestamp-query
+   "all" all-query})
 
 
 ;; Don't edit!
@@ -570,7 +595,7 @@
        function to handle the message
     2. Parse the message
     3. Load any saved state that is going to be needed to process
-       the message (e.g., querying the list of experts, etc.)
+       the message (e.g., querying the list of classmates, etc.)
     4. Find the function that can handle the message
     5. Call the handler function with the state from #3 and
        the message
