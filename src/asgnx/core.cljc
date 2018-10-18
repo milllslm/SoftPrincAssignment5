@@ -167,6 +167,8 @@
 ;;
 (defn action-send-msg [to msg]{:to to :msg msg :action :send})
 
+(defn save-state [state] {:action :assoc-in :ks [:state] :v state})
+
 ;; Asgn 2.
 ;;
 ;; @Todo: Create a function called action-send-msgs that takes
@@ -247,9 +249,17 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;;
-(defn classmates-register [classmates id info]
-  [(action-insert [:classmates id] info)])
+(defn classmates-register [super-state id info]
+  (let [convo (:conversations super-state)
+        quest (:questions super-state)
+        class (:classmates super-state)]
+    (-> {}
+        (assoc :questions quest)
+        (assoc :conversations convo)
+        (assoc :classmates (assoc class id info))
+        (save-state))))
 
+;;[(action-insert [:classmates id] info)]
 
 
 
@@ -450,8 +460,8 @@
 ;;
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
-(defn add-classmate [classmates {:keys [user-id]}]
-  [(classmates-register classmates  user-id {:job "cook"})
+(defn add-classmate [super-state {:keys [user-id]}]
+  [(classmates-register super-state  user-id {:job "cook"})
    (str user-id " is now a classmate! ")])
 
 (defn check-timeouts [questions {:keys [user-id]}]
@@ -459,12 +469,12 @@
   (if (empty? questions) [[] "There are no pending questions at this time."]
     [(into [] (reduce-kv (fn [m asker-id v] (if (> (get (get questions asker-id) :time) time) m (conj m (action-send-msg asker-id "question manually responded via timeout")))) () questions)) (str (get (get questions user-id) :time) "manually triggered: checking for timed out questions, the current time is " time)])))
 
-(defn list-questions [questions pmsg] [[] (str "list of questions: " questions)])
+(defn list-questions [super-state pmsg] [[] (str "list of questions: " (:questions super-state))])
 
 (defn questions-timestamp-query [state-mgr pmsg]
   (get! state-mgr [:questions]))
 
-(defn all-state [full-state pmsg] [[] (str (questions-timestamp-query full-state pmsg))])
+(defn all-state [super-state pmsg] [[] (str super-state)])
 
 ;; Don't edit!
 (defn stateless [f]
@@ -492,7 +502,7 @@
 ;; commands are received.
 ;;})
 
-
+(defn super-state [state-mgr pmsg] (get! state-mgr [:state]))
 ;; Don't edit!
 (defn classmates-query [state-mgr pmsg]
     (list! state-mgr [:classmates]))
@@ -509,12 +519,12 @@
 
 ;; Don't edit!
 (def queries
-  {"classmate" classmates-query
-   "ask"    classmates-query
-   "answer" conversations-for-user-query
-   "check" questions-timestamp-query
-   "questions" questions-timestamp-query
-   "all" all-query})
+  {"classmate" super-state
+   "ask"    super-state
+   "answer" super-state
+   "check" super-state
+   "questions" super-state
+   "all" super-state})
 
 
 ;; Don't edit!
