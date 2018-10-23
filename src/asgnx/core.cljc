@@ -167,6 +167,14 @@
 ;;
 (defn action-send-msg [to msg]{:to to :msg msg :action :send})
 
+
+;;save-state
+;;
+;; This function acts as the end function in any other method that causes
+;; changes in state, storing the entire state under a :state key,
+;; allowing for multiple state access and storage under single commands.
+(defn save-state [state] [{:action :assoc-in :ks [:state] :v state}])
+
 ;; Asgn 2.
 ;;
 ;; @Todo: Create a function called action-send-msgs that takes
@@ -247,9 +255,17 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;;
-(defn classmates-register [classmates id info]
-  [(action-insert [:classmates id] info)])
+(defn classmates-register [super-state id info]
+  (let [convo (:conversations super-state)
+        quest (:questions super-state)
+        class (:classmates super-state)]
+    (-> {}
+        (assoc :questions quest)
+        (assoc :conversations convo)
+        (assoc :classmates (assoc class id info))
+        (save-state))))
 
+;;[(action-insert [:classmates id] info)]
 
 
 
@@ -270,7 +286,15 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;; check
-(defn classmates-unregister [clssmates id] [(action-remove [:classmate id])])
+(defn classmates-unregister [super-state id]
+  (let [convo (:conversations super-state)
+        quest (:questions super-state)
+        class (:classmates super-state)]
+    (-> {}
+        (assoc :questions quest)
+        (assoc :conversations convo)
+        (assoc :classmates (dissoc class id))
+        (save-state))))
 
 (defn classmates-question-msg [classmates question-words]
   (str "Asking " (count classmates) " classmate(s) for an answer to: \""
@@ -335,18 +359,21 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;;
-(defn ask-classmates [classmates {:keys [args user-id]}]
+(defn ask-classmates [super-state {:keys [args user-id]}]
   (if (empty? args)
     [[] "You must ask a valid question."]
-    (if (empty? classmates)
-      [[] "You have no classmates."]
-      [(into [] (concat (action-inserts [:conversations] classmates user-id) [(action-insert [:questions] {user-id {:topic (first args) :time (+ (/ 1 60) (timestamp/date-time-now-str))}})]
-                 (action-send-msgs classmates (clojure.string/join " " (rest args)))))
-       (classmates-question-msg classmates args)])))
-
-;;[(action-insert [:questions] {user-id {:topic (first args) :time (+ (/ 1 60) (timestamp/date-time-now-str))}})]
-
-
+    (let
+      [convo (:conversations super-state)
+          quest (:questions super-state)
+          class (:classmates super-state)]
+      (if (empty? class) [[] "You have no classmates."]
+        [(into [] (concat
+                   (-> {}
+                       (assoc :questions (assoc quest user-id {:topic (first args) :time (+ 60000 (timestamp/date-time-now-str))}))
+                       (assoc :conversations (reduce (fn [m num] (assoc m num user-id)) convo (keys class)))
+                       (assoc :classmates class)
+                       (save-state))
+                   (action-send-msgs (into [] (keys class)) (clojure.string/join " " (rest args))))) (classmates-question-msg (keys class) (rest args))]))))
 
 
 ;; Asgn 3.
@@ -401,14 +428,31 @@
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
 ;;
-(defn answer-question
-  [conversation {:keys [args]}]
- (cond
-   (empty? conversation) [[] "You haven't been asked a question."]
-   (empty? args) [[] "You did not provide an answer."]
-   :else [[(action-send-msg conversation (clojure.string/join " " args))]
-          "Your answer was sent."]))
+(defn answer-question [super-state {:keys [args user-id]}]
+  (let
+    [convo (:conversations super-state)
+     quest (:questions super-state)
+     class (:classmates super-state)]
+    (cond
+      (empty? (get convo user-id)) [[] "You haven't been asked a question."]
+      (empty? args) [[] "You did not provide an answer."]
+      :else [(into []
+                   (concat
+                    (-> {}
+                        (assoc :questions (dissoc quest (get convo user-id)))
+                        (assoc :conversations convo)
+                        (assoc :classmates class)
+                        (save-state))
+                    (action-send-msgs [(get convo user-id)] (clojure.string/join " " args))))
+             "Your answer was sent."])))
 
+;;(defn answer-question
+;;  [conversation {:keys [args]}])
+ ;;(cond
+   ;;(empty? conversation) [[] "You haven't been asked a question."]
+   ;;(empty? args) [[] "You did not provide an answer."]
+   ;;:else [[(action-send-msg conversation (clojure.string/join " " args))]
+    ;;      "Your answer was sent."]))
 
 ;; Asgn 3.
 ;;
@@ -450,21 +494,19 @@
 ;;
 ;; See the integration test in See handle-message-test for the
 ;; expectations on how your code operates
-(defn add-classmate [classmates {:keys [user-id]}]
-  [(classmates-register classmates  user-id {:job "cook"})
+(defn add-classmate [super-state {:keys [user-id]}]
+  [(classmates-register super-state  user-id {:job "cook"})
    (str user-id " is now a classmate! ")])
 
-(defn check-timeouts [questions {:keys [user-id]}]
- (let [time (timestamp/date-time-now-str)]
-  (if (empty? questions) [[] "There are no pending questions at this time."]
-    [(into [] (reduce-kv (fn [m asker-id v] (if (> (get (get questions asker-id) :time) time) m (conj m (action-send-msg asker-id "question manually responded via timeout")))) () questions)) (str (get (get questions user-id) :time) "manually triggered: checking for timed out questions, the current time is " time)])))
+(defn check-timeouts [super-state pmsg]
+ (let [time (timestamp/date-time-now-str) quest (:questions super-state)]
+  (if (empty? quest) [[] "There are no pending questions at this time."]
+    [(into [] (reduce-kv (fn [m asker-id v] (if (> (get (get quest asker-id) :time) time) m (conj m (action-send-msg asker-id (str "Hey! We're sorry that nobody has responded yet. In lieu of an answer here is a (potentially) helpful link: https://en.wikipedia.org/wiki/" (get (get quest asker-id) :topic)) )))) () quest))
+     (str "You have manually triggered a check of timed-out questions: any timed out questions will be escalated at this time.")])))
 
-(defn list-questions [questions pmsg] [[] (str "list of questions: " questions)])
 
 (defn questions-timestamp-query [state-mgr pmsg]
   (get! state-mgr [:questions]))
-
-(defn all-state [full-state pmsg] [[] (str (questions-timestamp-query full-state pmsg))])
 
 ;; Don't edit!
 (defn stateless [f]
@@ -479,9 +521,7 @@
              "classmate" add-classmate
              "ask" ask-classmates
              "answer"  answer-question
-             "check" check-timeouts
-             "questions" list-questions
-             "all" all-state})
+             "check" check-timeouts})
 
 
 ;; Asgn 3.
@@ -492,7 +532,7 @@
 ;; commands are received.
 ;;})
 
-
+(defn super-state [state-mgr pmsg] (get! state-mgr [:state]))
 ;; Don't edit!
 (defn classmates-query [state-mgr pmsg]
     (list! state-mgr [:classmates]))
@@ -509,12 +549,11 @@
 
 ;; Don't edit!
 (def queries
-  {"classmate" classmates-query
-   "ask"    classmates-query
-   "answer" conversations-for-user-query
-   "check" questions-timestamp-query
-   "questions" questions-timestamp-query
-   "all" all-query})
+  {"classmate" super-state
+   "ask"    super-state
+   "answer" super-state
+   "check" super-state
+   "questions" super-state})
 
 
 ;; Don't edit!
