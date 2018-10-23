@@ -133,7 +133,7 @@ Each requirement will be listed as (a), will be accompanied by a (b) that ration
 
   b. The point of this application is to make an easier, more accessible version of a Piazza-esque system. Thus, not only should the messages be easily accessible for users (by texting it directly to them), but the set up should be as easy or easier than downloading an app on one's phone.
 
-  c. This will be done by adapting the 'add expert' functionality of the preexisting base code. In doing so set up for any individual (classmate, TA, or Professor) will be as easy as texting 'add <classmate, TA, or Professor>' to the appropriate phone number for the twilio bot.
+  c. This will be done by adapting the 'add expert' functionality of the preexisting base code. In doing so set up for any individual (classmate, TA, or Professor) will be as easy as texting '<classmate, TA, or Professor>' to the appropriate phone number for the twilio bot.
 
 4.
 
@@ -311,22 +311,22 @@ To test the twilio integration you will need to switch the environment in handle
 When you think you have a final working version of this application (or at least the prototype), it is strongly advised that you test this with a sample group of people to mimic a classroom setting. A couple of runs of this should identify errors in implementation or, at the very least, what might be the best next steps for future iterations of this project.
 
 ## Deployment
-???????????? waiting on updated spec from Professor for windows Home
+Follow the instructions found here: https://github.com/juleswhite/CSx278-2018-Asgn-5/blob/master/DEPLOY.md
 
 ## Demo Stub
 As noted throughout this document the scope of this idea is very large relative to the time we have to engineer it. Thus I will take this time to outline the capability that is being aimed for for the stubbed version needed for the demo date:
 
 - A text based app aimed at a specific classroom of students
-- Classmates, TAs, and Professors can all self-add via their respective functions as highlighted above
+- Classmates can self-add via the 'classmate' command
 - When a question is asked by a classmate, it will be texted to the rest of the class
 - Any member of the class that is texted a question may reply
-- If no reply is given in 10 minutes then a link to the wikipedia page for a given topic will be returned instead
-- No user should ask a new question before their previous question has been answered for the timer to work
+- If no answer has been sent by the time a minute has passed, the 'check' command will kick back the wikipedia page for the 
+  given topic
 
 ### Demo Use Tutorial
 Below are a set of simple steps for running the demo (or for live testing with a fake classroom)
 1. Deploy the code to AWS for integration with Twilio (see the above section on deployment)
-2. Have your participants text "add-classmate" to the Twilio number (+16159083013)
+2. Have your participants text "classmate" to the Twilio number (+16159083013)
 3.
 
   a. Have one participant (the demoer) text in a question "ask < topic > < remainder of question >"
@@ -335,7 +335,7 @@ Below are a set of simple steps for running the demo (or for live testing with a
 
 4.
 
-  a. After one minute has passed, have one participant text in the demo trigger for checking the timeout "check-timeouts"
+  a. After one minute has passed, have one participant text in the demo trigger for checking the timeout "check"
 
   b. The person who asked the question should receive the link to the wikipedia page for their topic.
 
