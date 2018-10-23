@@ -340,3 +340,9 @@ Below are a set of simple steps for running the demo (or for live testing with a
   b. The person who asked the question should receive the link to the Wikipedia page for their topic.
 
 5. If someone had already answered the question then no wiki link should have been returned.
+
+![ScreenShot](https://github.com/milllslm/SoftPrincAssignment5/blob/prototype/IMG_5993.PNG)
+![ScreenShot](https://github.com/milllslm/SoftPrincAssignment5/blob/prototype/IMG_5990.PNG)
+![ScreenShot](https://github.com/milllslm/SoftPrincAssignment5/blob/prototype/IMG_5991.PNG)
+![ScreenShot](https://github.com/milllslm/SoftPrincAssignment5/blob/prototype/IMG_5992.PNG)
+
